@@ -1,6 +1,7 @@
 import { BulletPath } from "./BulletPath";
 import { Input } from "./Input";
-import { presetPaths, Game } from ".";
+import { presetPaths } from ".";
+import { Game } from "./Game";
 import { Entity } from "./Entity";
 
 export class Player implements Entity {
