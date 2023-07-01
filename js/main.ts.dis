@@ -1,0 +1,210 @@
+class Input {
+    up: boolean;
+    down: boolean;
+    left: boolean;
+    right: boolean;
+    fire: boolean;
+    static instance: Input;
+
+    constructor() {
+        this.up = false;
+        this.down = false;
+        this.left = false;
+        this.right = false;
+        this.fire = false;
+        Input.instance = this;
+        document.onkeydown = (e) => this.keyDown(e);
+        document.onkeyup = (e) => this.keyUp(e);
+    }
+
+    keyDown(e: KeyboardEvent) {
+        switch (e.key) {
+            case "w":
+                this.up = true;
+                break;
+            case "s":
+                this.down = true;
+                break;
+            case "a":
+                this.left = true;
+                break;
+            case "d":
+                this.right = true;
+                break;
+            case " ":
+                this.fire = true;
+                break;
+        }
+    }
+
+    keyUp(e: KeyboardEvent) {
+        switch (e.key) {
+            case "w":
+                this.up = false;
+                break;
+            case "s":
+                this.down = false;
+                break;
+            case "a":
+                this.left = false;
+                break;
+            case "d":
+                this.right = false;
+                break;
+            case " ":
+                this.fire = false;
+                break;
+        }
+    }
+}
+new Input();
+
+interface Entity {
+    draw(ctx: CanvasRenderingContext2D): void;
+    update(): void;
+}
+class BulletPath implements Entity{
+    x: number;
+    y: number;
+    pathFunction: (t: number) => { x: number, y: number };
+    color: string;
+    radius: number;
+    activebullets: number[] = []; //bullet times
+    constructor(x: number, y: number, pathfunc: (t:number)=>{x:number,y:number}, color: string, radius: number) {
+        this.x = x;
+        this.y = y;
+        this.pathFunction = pathfunc;
+        this.color = color;
+        this.radius = radius;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.fillStyle = this.color;
+        for (let i = 0; i < this.activebullets.length; i++) {
+            let bullet = this.pathFunction(this.activebullets[i]);
+            ctx.beginPath();
+            ctx.arc(this.x + bullet.x, this.y + bullet.y, this.radius, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+    }
+
+    update() {
+        for (let i = 0; i < this.activebullets.length; i++) {
+            this.activebullets[i]++;
+            if (this.activebullets[i] > 100) {
+                this.activebullets.splice(i, 1);
+                i--;
+            }
+        }
+    }
+
+    fire() {
+        this.activebullets.push(0);
+    }
+}
+const presetPaths = {
+    straight: (x: number, y: number, speed: number) => {
+        return (t: number) => ({x: t * speed, y: 0});
+    },
+    sin: (x: number, y: number, speed: number) => {
+        return (t: number) => ({x: t * speed, y: Math.sin(t*speed*Math.PI/180)*50});
+    },
+    cos: (x: number, y: number, speed: number) => {
+        return (t: number) => ({x: t * speed, y: Math.cos(t*speed*Math.PI/180)*50});
+    },
+}
+        
+class Player implements Entity{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    color: string;
+    speed: number;
+    cooldown: number = 0;
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.width = 50;
+        this.height = 50;
+        this.color = "blue";
+        this.speed = 5;
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        ctx.fillStyle = this.color;
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+
+    update() {
+        if (Input.instance.up) {
+            this.y -= this.speed;
+        }
+        if (Input.instance.down) {
+            this.y += this.speed;
+        }
+        if (Input.instance.left) {
+            this.x -= this.speed;
+        }
+        if (Input.instance.right) {
+            this.x += this.speed;
+        }
+        if (Input.instance.fire) {
+            this.fire();
+        }
+        this.cooldown--;
+    }
+
+    fire() {
+        if (this.cooldown > 0) {
+            return;
+        }
+        this.cooldown = 10;
+        //shoot straight forward
+        
+        let bullet = new BulletPath(this.x, this.y, presetPaths.sin(this.x,this.y, 4), "black", 5);
+        Game.instance.spawn(bullet);
+        bullet.fire();
+    }
+}
+
+class Game {
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D;
+    player: Player;
+    entities: Entity[] = [];
+    static instance: Game;
+    constructor() {
+        this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
+        this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+        this.player = new Player();
+        this.entities.push(this.player);
+        Game.instance = this;
+    }
+
+    update() {
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].update();
+        }
+    }
+
+    draw() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        for (let i = 0; i < this.entities.length; i++) {
+            this.entities[i].draw(this.ctx);
+        }
+    }
+
+    loop() {
+        this.update();
+        this.draw();
+        requestAnimationFrame(() => this.loop());
+    }
+
+    spawn(entity: Entity) {
+        this.entities.push(entity);
+    }
+}
+
+let game = new Game();
+game.loop();
