@@ -37,6 +37,22 @@ export class Player implements Entity {
         if (Input.instance.right) {
             this.x += this.speed * dt;
         }
+        this.checkBounds();
+    }
+
+    checkBounds() {
+        if (this.x < Game.instance.bounds.x) {
+            this.x = Game.instance.bounds.x;
+        }
+        if (this.x + this.width > Game.instance.bounds.x + Game.instance.bounds.width) {
+            this.x = Game.instance.bounds.x + Game.instance.bounds.width - this.width;
+        }
+        if (this.y < Game.instance.bounds.y) {
+            this.y = Game.instance.bounds.y;
+        }
+        if (this.y + this.height > Game.instance.bounds.y + Game.instance.bounds.height) {
+            this.y = Game.instance.bounds.y + Game.instance.bounds.height - this.height;
+        }
     }
     update(dt: number) {
         switch (this.state) {

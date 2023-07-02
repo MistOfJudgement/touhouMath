@@ -7,7 +7,7 @@ export class Game {
     ctx: CanvasRenderingContext2D;
     player: Player;
     entities: Entity[] = [];
-    bounds: {width: number, height: number};
+    bounds: {x: number, y: number, width: number, height: number};
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
     constructor() {
@@ -15,7 +15,7 @@ export class Game {
         this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
         this.player = new Player();
         this.entities.push(this.player);
-        this.bounds = {width: this.canvas.width, height: this.canvas.height};
+        this.bounds = {x: 0, y: 0, width: this.canvas.width, height: this.canvas.height};
         Game.instance = this;
     }
 
