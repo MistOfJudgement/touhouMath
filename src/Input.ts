@@ -1,17 +1,12 @@
 export class Input {
-    up: boolean;
-    down: boolean;
-    left: boolean;
-    right: boolean;
-    fire: boolean;
+    up: boolean = false;
+    down: boolean = false;
+    left: boolean = false;
+    right: boolean = false;
+    fire: boolean = false;
     static instance: Input;
 
     constructor() {
-        this.up = false;
-        this.down = false;
-        this.left = false;
-        this.right = false;
-        this.fire = false;
         Input.instance = this;
         document.onkeydown = (e) => this.keyDown(e);
         document.onkeyup = (e) => this.keyUp(e);

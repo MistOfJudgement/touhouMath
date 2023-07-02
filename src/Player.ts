@@ -5,23 +5,18 @@ import { Game } from "./Game";
 import { Entity } from "./Entity";
 
 export class Player implements Entity {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-    color: string;
-    speed: number;
+    x: number = 0;
+    y: number = 0;
+    width: number = 50;
+    height: number = 50;
+    color: string = "red";
+    speed: number = 0.25;
     cooldown: number = 0;
     timeBetweenShots: number = 1000;
     state: "inactive" | "moving" | "firing" = "moving";
     currentPath: BulletPath | null = null;
     constructor() {
-        this.x = 0;
-        this.y = 0;
-        this.width = 50;
-        this.height = 50;
-        this.color = "red";
-        this.speed = 0.25;
+
     }
 
     draw(ctx: CanvasRenderingContext2D) {
