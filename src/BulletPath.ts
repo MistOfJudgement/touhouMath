@@ -20,6 +20,7 @@ export class BulletPath implements Entity {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
+        this.drawPath(ctx);
         ctx.fillStyle = this.color;
         for (let i = 0; i < this.activebullets.length; i++) {
             let bullet = this.pathFunction(this.activebullets[i]);
@@ -27,6 +28,16 @@ export class BulletPath implements Entity {
             ctx.arc(this.x + bullet.x, this.y + bullet.y, this.radius, 0, 2 * Math.PI);
             ctx.fill();
         }
+    }
+    drawPath(ctx: CanvasRenderingContext2D) {
+        ctx.strokeStyle = 'black';
+        ctx.beginPath();
+        ctx.moveTo(this.x, this.y);
+        for (let i = 0; i < 100; i++) {
+            let bullet = this.pathFunction(i);
+            ctx.lineTo(this.x + bullet.x, this.y + bullet.y);
+        }
+        ctx.stroke();
     }
 
     update(dt :number) {
