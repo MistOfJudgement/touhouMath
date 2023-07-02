@@ -8,9 +8,10 @@ export class BulletPath implements Entity {
     color: string;
     radius: number;
     count: number = 5;
-    spawnrate: number = 10;
+    spawnrate: number = 100;
     spawnTimer: number = 0;
     activebullets: number[] = []; //bullet times
+    timeToLive: number = 6_000;
     constructor(x: number, y: number, pathfunc: (t: number) => { x: number; y: number; }, color: string, radius: number) {
         this.x = x;
         this.y = y;
@@ -33,7 +34,7 @@ export class BulletPath implements Entity {
         ctx.strokeStyle = 'black';
         ctx.beginPath();
         ctx.moveTo(this.x, this.y);
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < this.timeToLive; i+=1) {
             let bullet = this.pathFunction(i);
             ctx.lineTo(this.x + bullet.x, this.y + bullet.y);
         }
@@ -46,8 +47,8 @@ export class BulletPath implements Entity {
             return;
         }
         for (let i = 0; i < this.activebullets.length; i++) {
-            this.activebullets[i]++;
-            if (this.activebullets[i] > 100) {
+            this.activebullets[i]+=dt;
+            if (this.activebullets[i] > this.timeToLive) {
                 this.activebullets.splice(i, 1);
                 i--;
             }
@@ -55,7 +56,7 @@ export class BulletPath implements Entity {
 
         if (this.count > 0) {
             if (this.spawnTimer > 0) {
-                this.spawnTimer--;
+                this.spawnTimer -= dt;
             }
             else {
                 this.activebullets.push(0);

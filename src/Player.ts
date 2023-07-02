@@ -12,6 +12,7 @@ export class Player implements Entity {
     color: string;
     speed: number;
     cooldown: number = 0;
+    timeBetweenShots: number = 1000;
     state: "inactive" | "moving" | "firing" = "moving";
     currentPath: BulletPath | null = null;
     constructor() {
@@ -20,7 +21,7 @@ export class Player implements Entity {
         this.width = 50;
         this.height = 50;
         this.color = "red";
-        this.speed = 5;
+        this.speed = 0.25;
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -28,18 +29,18 @@ export class Player implements Entity {
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
-    handleMove() {
+    handleMove(dt: number) {
         if (Input.instance.up) {
-            this.y -= this.speed;
+            this.y -= this.speed * dt;
         }
         if (Input.instance.down) {
-            this.y += this.speed;
+            this.y += this.speed * dt;
         }
         if (Input.instance.left) {
-            this.x -= this.speed;
+            this.x -= this.speed * dt;
         }
         if (Input.instance.right) {
-            this.x += this.speed;
+            this.x += this.speed * dt;
         }
     }
     update(dt: number) {
@@ -48,12 +49,12 @@ export class Player implements Entity {
                 this.state = "moving";
                 break;
             case "moving":
-                this.handleMove();
+                this.handleMove(dt);
                 if (Input.instance.fire) {
                     this.fire();
                 }
                 if (this.cooldown > 0) {
-                    this.cooldown--;
+                    this.cooldown -= dt;
                 }
                 break;
             case "firing":
@@ -74,8 +75,8 @@ export class Player implements Entity {
             return;
         }
         this.state = "firing";
-        this.cooldown = 10;
-        this.currentPath = new BulletPath(this.x, this.y, presetPaths.sin(this.x, this.y, 5), "blue", 5);
+        this.cooldown = this.timeBetweenShots;
+        this.currentPath = new BulletPath(this.x, this.y, presetPaths.sin(this.x, this.y, 0.5), "blue", 5);
         Game.instance.spawn(this.currentPath);
     }
 }
