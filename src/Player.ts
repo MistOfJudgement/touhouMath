@@ -12,6 +12,8 @@ export class Player implements Entity {
     color: string;
     speed: number;
     cooldown: number = 0;
+    state: "inactive" | "moving" | "firing" = "moving";
+    currentPath: BulletPath | null = null;
     constructor() {
         this.x = 0;
         this.y = 0;
@@ -26,7 +28,7 @@ export class Player implements Entity {
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 
-    update() {
+    handleMove() {
         if (Input.instance.up) {
             this.y -= this.speed;
         }
@@ -39,20 +41,41 @@ export class Player implements Entity {
         if (Input.instance.right) {
             this.x += this.speed;
         }
-        if (Input.instance.fire) {
-            this.fire();
+    }
+    update(dt: number) {
+        switch (this.state) {
+            case "inactive":
+                this.state = "moving";
+                break;
+            case "moving":
+                this.handleMove();
+                if (Input.instance.fire) {
+                    this.fire();
+                }
+                if (this.cooldown > 0) {
+                    this.cooldown--;
+                }
+                break;
+            case "firing":
+                if (this.currentPath) {
+                    // this.currentPath.update(dt);
+                    if(this.currentPath.count == 0){
+                        this.state = "moving";
+                        this.currentPath = null;
+                    }
+                }
+                break;
         }
-        this.cooldown--;
+        
     }
 
     fire() {
         if (this.cooldown > 0) {
             return;
         }
+        this.state = "firing";
         this.cooldown = 10;
-        //shoot straight forward
-        let bullet = new BulletPath(this.x, this.y, presetPaths.sin(this.x, this.y, 4), "black", 5);
-        Game.instance.spawn(bullet);
-        bullet.fire();
+        this.currentPath = new BulletPath(this.x, this.y, presetPaths.sin(this.x, this.y, 5), "blue", 5);
+        Game.instance.spawn(this.currentPath);
     }
 }

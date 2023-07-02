@@ -1,4 +1,5 @@
 import { Entity } from "./Entity";
+import { Game } from "./Game";
 
 export class BulletPath implements Entity {
     x: number;
@@ -6,6 +7,9 @@ export class BulletPath implements Entity {
     pathFunction: (t: number) => { x: number; y: number; };
     color: string;
     radius: number;
+    count: number = 5;
+    spawnrate: number = 10;
+    spawnTimer: number = 0;
     activebullets: number[] = []; //bullet times
     constructor(x: number, y: number, pathfunc: (t: number) => { x: number; y: number; }, color: string, radius: number) {
         this.x = x;
@@ -25,7 +29,11 @@ export class BulletPath implements Entity {
         }
     }
 
-    update() {
+    update(dt :number) {
+        if (this.completed) {
+            Game.instance.remove(this);
+            return;
+        }
         for (let i = 0; i < this.activebullets.length; i++) {
             this.activebullets[i]++;
             if (this.activebullets[i] > 100) {
@@ -33,9 +41,20 @@ export class BulletPath implements Entity {
                 i--;
             }
         }
+
+        if (this.count > 0) {
+            if (this.spawnTimer > 0) {
+                this.spawnTimer--;
+            }
+            else {
+                this.activebullets.push(0);
+                this.spawnTimer = this.spawnrate;
+                this.count--;
+            }
+        }
     }
 
-    fire() {
-        this.activebullets.push(0);
+    get completed() {
+        return this.count == 0 && this.activebullets.length == 0;
     }
 }

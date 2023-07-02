@@ -16,5 +16,4 @@ export const presetPaths = {
         
 let game = new Game();
 
-
-game.loop();
+window.requestAnimationFrame(Game.instance.loop.bind(Game.instance));
