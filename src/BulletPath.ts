@@ -51,6 +51,15 @@ export class BulletPath implements Entity {
             if (this.activebullets[i] > this.timeToLive) {
                 this.activebullets.splice(i, 1);
                 i--;
+            } else if (this.pathFunction(this.activebullets[i]).x + this.x > Game.instance.bounds.x + Game.instance.bounds.width) {
+                this.activebullets.splice(i, 1);
+                i--;
+
+                //change the time to live to the time it took to get to the edge
+                //TODO i want to set time to live such that it is set initially
+                if(this.timeToLive > this.activebullets[i]) {
+                    this.timeToLive = this.activebullets[i];
+                }
             }
         }
 
