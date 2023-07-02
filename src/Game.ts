@@ -1,3 +1,4 @@
+import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Player } from "./Player";
 
@@ -6,6 +7,7 @@ export class Game {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     player: Player;
+    enemies : Enemy[] = [];
     entities: Entity[] = [];
     bounds: {x: number, y: number, width: number, height: number};
     private lastTimestamp: DOMHighResTimeStamp = 0;
@@ -17,6 +19,12 @@ export class Game {
         this.entities.push(this.player);
         this.bounds = {x: 0, y: 0, width: this.canvas.width, height: this.canvas.height};
         Game.instance = this;
+        setInterval(() => {
+            let enemy = new Enemy();
+            enemy.x = Math.random() * this.canvas.width;
+            enemy.y = Math.random() * this.canvas.height;
+            this.spawn(enemy);
+        }, 6000);
     }
 
     update(dt: number) {
@@ -46,12 +54,21 @@ export class Game {
 
     spawn(entity: Entity) {
         this.entities.push(entity);
+        if (entity instanceof Enemy) {
+            this.enemies.push(entity);
+        }
     }
 
     remove(entity: Entity) {
         let index = this.entities.indexOf(entity);
         if (index > -1) {
             this.entities.splice(index, 1);
+        }
+        if (entity instanceof Enemy) {
+            index = this.enemies.indexOf(entity);
+            if (index > -1) {
+                this.enemies.splice(index, 1);
+            }
         }
     }
 }
