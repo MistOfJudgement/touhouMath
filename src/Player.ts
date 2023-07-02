@@ -22,6 +22,13 @@ export class Player implements Entity {
     draw(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.x, this.y, this.width, this.height);
+    
+        //draw cooldown
+        if (this.cooldown <= 0) {
+            return;
+        }
+        ctx.fillStyle = "blue";
+        ctx.fillRect(this.x, this.y + this.height, this.width * (this.cooldown / this.timeBetweenShots), 5);
     }
 
     handleMove(dt: number) {
