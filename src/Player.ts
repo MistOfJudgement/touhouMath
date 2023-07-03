@@ -14,6 +14,7 @@ export class Player implements Entity {
     cooldown: number = 0;
     timeBetweenShots: number = 1000;
     state: "inactive" | "moving" | "firing" = "moving";
+    selectedPath: (t: number) => { x: number; y: number; } = presetPaths.straight(0, 0, 0.5);
     currentPath: BulletPath | null = null;
     constructor() {
 
@@ -94,7 +95,7 @@ export class Player implements Entity {
         }
         this.state = "firing";
         this.cooldown = this.timeBetweenShots;
-        this.currentPath = new BulletPath(this.x, this.y, presetPaths.sin(this.x, this.y, 0.5), "blue", 5);
+        this.currentPath = new BulletPath(this.x, this.y, this.selectedPath, "blue", 5);
         Game.instance.spawn(this.currentPath);
     }
 }
