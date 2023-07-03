@@ -1,56 +1,52 @@
+export const Actions = ["up", "down", "left", "right", "fire"] as const;
+export type Action = typeof Actions[number];
 export class Input {
-    up: boolean = false;
-    down: boolean = false;
-    left: boolean = false;
-    right: boolean = false;
-    fire: boolean = false;
+    mapping: {[key: string]: Action} = {
+        "w": "up",
+        "s": "down",
+        "a": "left",
+        "d": "right",
+        " ": "fire"
+    }
+    currentState: {[key: string]: boolean};
+    previousState: {[key: string]: boolean};
     static instance: Input;
 
     constructor() {
         Input.instance = this;
+        this.currentState = {};
+        this.previousState = {};
+        for (let action of Actions) {
+            this.currentState[action] = false;
+            this.previousState[action] = false;
+        }
         document.onkeydown = (e) => this.keyDown(e);
         document.onkeyup = (e) => this.keyUp(e);
     }
 
     keyDown(e: KeyboardEvent) {
-        switch (e.key) {
-            case "w":
-                this.up = true;
-                break;
-            case "s":
-                this.down = true;
-                break;
-            case "a":
-                this.left = true;
-                break;
-            case "d":
-                this.right = true;
-                break;
-            case " ":
-                this.fire = true;
-                break;
+        let action = this.mapping[e.key];
+        if (action) {
+            this.currentState[action] = true;
         }
     }
 
     keyUp(e: KeyboardEvent) {
-        switch (e.key) {
-            case "w":
-                this.up = false;
-                break;
-            case "s":
-                this.down = false;
-                break;
-            case "a":
-                this.left = false;
-                break;
-            case "d":
-                this.right = false;
-                break;
-            case " ":
-                this.fire = false;
-                break;
+        let action = this.mapping[e.key];
+        if (action) {
+            this.currentState[action] = false;
         }
     }
+    getState(action: Action) {
+        return this.currentState[action];
+    }
+    justPressed(action: Action) {
+        return this.currentState[action] && !this.previousState[action];
+    }
+    update() {
+        this.previousState = {...this.currentState};
+    }
+
     static {
         new Input();
     }

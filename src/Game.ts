@@ -41,11 +41,13 @@ export class Game {
                 }
                 break;
             case "paused":
-                if(Input.instance.fire) {
+                if(Input.instance.justPressed("fire")) {
                     this.state = "playing";
                 }
                 break;
         }
+        Input.instance.update();
+
     }
 
     draw(ctx : CanvasRenderingContext2D) {

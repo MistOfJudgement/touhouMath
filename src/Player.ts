@@ -33,16 +33,16 @@ export class Player implements Entity {
     }
 
     handleMove(dt: number) {
-        if (Input.instance.up) {
+        if (Input.instance.getState("up")) {
             this.y -= this.speed * dt;
         }
-        if (Input.instance.down) {
+        if (Input.instance.getState("down")) {
             this.y += this.speed * dt;
         }
-        if (Input.instance.left) {
+        if (Input.instance.getState("left")) {
             this.x -= this.speed * dt;
         }
-        if (Input.instance.right) {
+        if (Input.instance.getState("right")) {
             this.x += this.speed * dt;
         }
         this.checkBounds();
@@ -69,7 +69,7 @@ export class Player implements Entity {
                 break;
             case "moving":
                 this.handleMove(dt);
-                if (Input.instance.fire) {
+                if (Input.instance.justPressed("fire")) {
                     this.fire();
                 }
                 if (this.cooldown > 0) {
