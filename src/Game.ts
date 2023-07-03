@@ -1,5 +1,6 @@
 import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
+import { Input } from "./Input";
 import { Player } from "./Player";
 
 
@@ -10,6 +11,7 @@ export class Game {
     enemies : Enemy[] = [];
     entities: Entity[] = [];
     bounds: {x: number, y: number, width: number, height: number};
+    state: "playing" | "paused" = "playing";
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
     constructor() {
@@ -28,15 +30,37 @@ export class Game {
     }
 
     update(dt: number) {
-        for (let i = 0; i < this.entities.length; i++) {
-            this.entities[i].update(dt);
+        switch (this.state) {
+            case "playing":
+                if (dt > 1000) { //This might break if the game gets too laggy
+                    this.state = "paused";
+                    break;
+                }
+                for (let i = 0; i < this.entities.length; i++) {
+                    this.entities[i].update(dt);
+                }
+                break;
+            case "paused":
+                if(Input.instance.fire) {
+                    this.state = "playing";
+                }
+                break;
         }
     }
 
-    draw() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    draw(ctx : CanvasRenderingContext2D) {
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         for (let i = 0; i < this.entities.length; i++) {
             this.entities[i].draw(this.ctx);
+        }
+
+        if (this.state == "paused") {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+            ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            ctx.fillStyle = "white";
+            ctx.font = "30px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("Paused", this.canvas.width / 2, this.canvas.height / 2);
         }
     }
 
@@ -48,7 +72,7 @@ export class Game {
         Game.instance.lastTimestamp = timestamp;
 
         this.update(dt);
-        this.draw();
+        this.draw(this.ctx);
         requestAnimationFrame(this.loop.bind(this));
     }
 
