@@ -10,10 +10,16 @@ export class BulletPath implements Entity {
     radius: number;
     count: number;
     spawnrate: number;
+
     spawnTimer: number = 0;
     activebullets: number[] = []; //bullet times
     timeToLive: number = 6_000;
-    constructor(x: number, y: number, pathfunc: (t: number) => { x: number; y: number; }, color: string, radius: number, count: number = 5, spawnrate: number = 100) {
+    constructor(x: number, y: number,
+                pathfunc: (t: number) => { x: number; y: number; }, 
+                color: string = "blue", 
+                radius: number = 5, 
+                count: number = 5, 
+                spawnrate: number = 100) {
         this.x = x;
         this.y = y;
         this.pathFunction = pathfunc;

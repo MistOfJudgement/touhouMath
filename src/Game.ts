@@ -56,6 +56,10 @@ export class Game {
             this.entities[i].draw(this.ctx);
         }
 
+        this.drawPauseScreen(ctx);
+    }
+
+    private drawPauseScreen(ctx: CanvasRenderingContext2D) {
         if (this.state == "paused") {
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
             ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);

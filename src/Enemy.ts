@@ -2,7 +2,7 @@ import { BulletPath } from "./BulletPath";
 import { Entity } from "./Entity";
 import { Game } from "./Game";
 import { Point } from "./Vec2";
-
+ 
 export class Enemy implements Entity{
     x: number = 0;
     y: number = 0;
@@ -10,8 +10,22 @@ export class Enemy implements Entity{
     height: number = 30;
     color: string = "blue";
     speed: number = 0.15;
-    cooldown: number = 0;
     timeBetweenShots: number = 1000;
+
+    cooldown: number = 0;
+    constructor();
+    constructor(x: number = 0, y: number = 0,
+                width: number = 30, height: number = 30,
+                color: string = "blue", speed: number = 0.15,
+                timeBetweenShots: number = 1000) {
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.color = color;
+        this.speed = speed;
+        this.timeBetweenShots = timeBetweenShots;
+    }
 
     draw(ctx: CanvasRenderingContext2D): void {
         ctx.fillStyle = this.color;
