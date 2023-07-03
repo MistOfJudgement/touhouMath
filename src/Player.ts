@@ -21,14 +21,14 @@ export class Player implements Entity {
 
     draw(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
     
         //draw cooldown
         if (this.cooldown <= 0) {
             return;
         }
         ctx.fillStyle = "blue";
-        ctx.fillRect(this.x, this.y + this.height, this.width * (this.cooldown / this.timeBetweenShots), 5);
+        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height * (this.cooldown / this.timeBetweenShots));
     }
 
     handleMove(dt: number) {
@@ -48,18 +48,18 @@ export class Player implements Entity {
     }
 
     checkBounds() {
-        if (this.x < Game.instance.bounds.x) {
-            this.x = Game.instance.bounds.x;
+        if (this.x - this.width / 2 < Game.instance.bounds.x) {
+            this.x = Game.instance.bounds.x + this.width / 2;
+        } else if (this.x + this.width / 2 > Game.instance.bounds.x + Game.instance.bounds.width) {
+            this.x = Game.instance.bounds.x + Game.instance.bounds.width - this.width / 2;
         }
-        if (this.x + this.width > Game.instance.bounds.x + Game.instance.bounds.width) {
-            this.x = Game.instance.bounds.x + Game.instance.bounds.width - this.width;
+        if (this.y - this.height / 2 < Game.instance.bounds.y) {
+            this.y = Game.instance.bounds.y + this.height / 2;
         }
-        if (this.y < Game.instance.bounds.y) {
-            this.y = Game.instance.bounds.y;
+        else if (this.y + this.height / 2 > Game.instance.bounds.y + Game.instance.bounds.height) {
+            this.y = Game.instance.bounds.y + Game.instance.bounds.height - this.height / 2;
         }
-        if (this.y + this.height > Game.instance.bounds.y + Game.instance.bounds.height) {
-            this.y = Game.instance.bounds.y + Game.instance.bounds.height - this.height;
-        }
+        
     }
     update(dt: number) {
         switch (this.state) {

@@ -15,7 +15,7 @@ export class Enemy implements Entity{
 
     draw(ctx: CanvasRenderingContext2D): void {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
+        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
     }
     update(dt: number): void {
         //buzzes around randomly for now
@@ -30,7 +30,11 @@ export class Enemy implements Entity{
         }
     }
     collides(point: Point) {
-        return point.x > this.x && point.x < this.x + this.width && point.y > this.y && point.y < this.y + this.height;
+        return point.x > this.x - this.width / 2 &&
+            point.x < this.x + this.width / 2 &&
+            point.y > this.y - this.height / 2 &&
+            point.y < this.y + this.height / 2;
+            
     }
     fire() {
         //single aimed shot
