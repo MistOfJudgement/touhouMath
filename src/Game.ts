@@ -61,6 +61,7 @@ export class Game {
         this.drawHitcount(ctx);
         this.drawPauseScreen(ctx);
     }
+    //hitcount is drawn at the top left
     drawHitcount(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = "black";
         ctx.font = "30px Arial";
@@ -68,6 +69,13 @@ export class Game {
         ctx.fillText("Times hit: " + this.timesHit, 10, 30);
     }
 
+    //frame rate is drawn at the top right
+    drawFramerate(ctx: CanvasRenderingContext2D, dt: number) {
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("FPS: " + Math.round(1000 / dt), this.canvas.width - 120, 30);
+    }
     private drawPauseScreen(ctx: CanvasRenderingContext2D) {
         if (this.state == "paused") {
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
@@ -88,6 +96,7 @@ export class Game {
 
         this.update(dt);
         this.draw(this.ctx);
+        this.drawFramerate(this.ctx, dt);
         requestAnimationFrame(this.loop.bind(this));
     }
 
