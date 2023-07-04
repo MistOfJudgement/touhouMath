@@ -12,6 +12,7 @@ export class Game {
     entities: Entity[] = [];
     bounds: {x: number, y: number, width: number, height: number};
     state: "playing" | "paused" = "playing";
+    readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
     constructor() {
@@ -32,7 +33,7 @@ export class Game {
     update(dt: number) {
         switch (this.state) {
             case "playing":
-                if (dt > 1000) { //This might break if the game gets too laggy
+                if (dt > this.timeBeforePause) { //This might break if the game gets too laggy
                     this.state = "paused";
                     break;
                 }
