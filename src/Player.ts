@@ -4,6 +4,7 @@ import { presetPaths } from ".";
 import { Game } from "./Game";
 import { Entity } from "./Entity";
 import { Point, Vector } from "./Utils";
+import { drawAxis } from "./Axis";
 
 export class Player implements Entity {
     
@@ -24,6 +25,7 @@ export class Player implements Entity {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
+
         ctx.fillStyle = this.color;
         ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height);
     
@@ -41,7 +43,7 @@ export class Player implements Entity {
 
         //draw path
         drawPath(ctx, this.position, this.selectedPath, 1000, "black");
-
+        drawAxis(ctx, this.position.x, this.position.y, 1000, 50, 50, "black");
     }
 
     handleMove(dt: number) {
