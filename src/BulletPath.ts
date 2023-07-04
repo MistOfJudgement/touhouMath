@@ -76,13 +76,19 @@ export class BulletPath implements Entity {
                     this.timeToLive = this.activebullets[i];
                 }
             }
-            if (this.color == "blue") {
+            if (this.color == "blue") {//friendly bullets collide with enemies
                 for(const enemy of Game.instance.enemies) {
                     if (enemy.collides(Vector.add({x: this.x, y: this.y}, this.pathFunction(this.activebullets[i])))) {
                         this.activebullets.splice(i, 1);
                         i--;
                         Game.instance.remove(enemy);
                     }
+                }
+            } else if (this.color == "red") {//enemy bullets collide with player
+                if (Game.instance.player.collides(Vector.add({x: this.x, y: this.y}, this.pathFunction(this.activebullets[i])))) {
+                    this.activebullets.splice(i, 1);
+                    i--;
+                    Game.instance.timesHit++;
                 }
             }
         }

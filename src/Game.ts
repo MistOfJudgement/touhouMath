@@ -12,6 +12,7 @@ export class Game {
     entities: Entity[] = [];
     bounds: {x: number, y: number, width: number, height: number};
     state: "playing" | "paused" = "playing";
+    timesHit: number = 0;
     readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
@@ -56,8 +57,14 @@ export class Game {
         for (let i = 0; i < this.entities.length; i++) {
             this.entities[i].draw(this.ctx);
         }
-
+        this.drawHitcount(ctx);
         this.drawPauseScreen(ctx);
+    }
+    drawHitcount(ctx: CanvasRenderingContext2D) {
+        ctx.fillStyle = "black";
+        ctx.font = "30px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("Times hit: " + this.timesHit, 10, 30);
     }
 
     private drawPauseScreen(ctx: CanvasRenderingContext2D) {

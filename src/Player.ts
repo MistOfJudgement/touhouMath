@@ -5,6 +5,7 @@ import { Game } from "./Game";
 import { Entity } from "./Entity";
 
 export class Player implements Entity {
+    
     x: number = 0;
     y: number = 0;
     width: number = 50;
@@ -13,6 +14,8 @@ export class Player implements Entity {
     speed: number = 0.25;
     cooldown: number = 0;
     timeBetweenShots: number = 1000;
+    hitboxRadius: number = 10;
+    hitboxColor: string = "green";
     state: "inactive" | "moving" | "firing" = "moving";
     selectedPath: (t: number) => { x: number; y: number; } = presetPaths.straight(0, 0, 0.5);
     currentPath: BulletPath | null = null;
@@ -25,11 +28,16 @@ export class Player implements Entity {
         ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
     
         //draw cooldown
-        if (this.cooldown <= 0) {
-            return;
+        if (this.cooldown > 0) {
+            ctx.fillStyle = "blue";
+            ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height * (this.cooldown / this.timeBetweenShots));
         }
-        ctx.fillStyle = "blue";
-        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height * (this.cooldown / this.timeBetweenShots));
+        //draw hitbox
+        ctx.fillStyle = this.hitboxColor;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.hitboxRadius, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.closePath();
     }
 
     handleMove(dt: number) {
@@ -97,5 +105,9 @@ export class Player implements Entity {
         this.cooldown = this.timeBetweenShots;
         this.currentPath = new BulletPath(this.x, this.y, this.selectedPath, "blue", 5);
         Game.instance.spawn(this.currentPath);
+    }
+
+    collides(point: { x: number; y: number; }) {
+        return Math.sqrt((point.x - this.x) ** 2 + (point.y - this.y) ** 2) < this.hitboxRadius;
     }
 }
