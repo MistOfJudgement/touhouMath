@@ -44,7 +44,13 @@ confirmButton!.addEventListener("click", () => {
     console.log("loaded");
     console.log(game.player.selectedPath);
 });
-
+functionBox!.addEventListener("keyup", (e) => {
+    if (e.key == "Enter") {
+        confirmButton.click();
+        e.preventDefault();
+        functionBox.blur();
+    }
+});
 let game = new Game();
 
 window.requestAnimationFrame(Game.instance.loop.bind(Game.instance));

@@ -1,4 +1,4 @@
-import { BulletPath } from "./BulletPath";
+import { BulletPath, drawPath } from "./BulletPath";
 import { Input } from "./Input";
 import { presetPaths } from ".";
 import { Game } from "./Game";
@@ -40,9 +40,7 @@ export class Player implements Entity {
         ctx.closePath();
 
         //draw path
-        if (this.currentPath) {
-            this.currentPath.draw(ctx);
-        }
+        drawPath(ctx, this.position, this.selectedPath, 1000, "black");
 
     }
 
