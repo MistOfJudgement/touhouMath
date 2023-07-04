@@ -1,11 +1,10 @@
 import { BulletPath } from "./BulletPath";
 import { Entity } from "./Entity";
 import { Game } from "./Game";
-import { Point } from "./Vec2";
+import { Point, Vector } from "./Utils";
  
 export class Enemy implements Entity{
-    x: number = 0;
-    y: number = 0;
+    position: Point = {x: 0, y: 0};
     width: number = 30;
     height: number = 30;
     color: string = "blue";
@@ -14,12 +13,11 @@ export class Enemy implements Entity{
 
     cooldown: number = 0;
     constructor();
-    constructor(x: number = 0, y: number = 0,
+    constructor(spawn: Point = {x:0, y:0},
                 width: number = 30, height: number = 30,
                 color: string = "blue", speed: number = 0.15,
                 timeBetweenShots: number = 1000) {
-        this.x = x;
-        this.y = y;
+        this.position = spawn;
         this.width = width;
         this.height = height;
         this.color = color;
@@ -29,13 +27,14 @@ export class Enemy implements Entity{
 
     draw(ctx: CanvasRenderingContext2D): void {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+        ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height);
     }
     update(dt: number): void {
         //buzzes around randomly for now
-        this.x += (Math.random() - 0.5) * this.speed * dt;
-        this.y += (Math.random() - 0.5) * this.speed * dt;
-
+        // this.x += (Math.random() - 0.5) * this.speed * dt;
+        // this.y += (Math.random() - 0.5) * this.speed * dt;
+        this.position = {x: this.position.x + (Math.random() - 0.5) * this.speed * dt,
+                            y: this.position.y + (Math.random() - 0.5) * this.speed * dt};
         if (this.cooldown > 0) {
             this.cooldown -= dt;
         } else {
@@ -44,19 +43,18 @@ export class Enemy implements Entity{
         }
     }
     collides(point: Point) {
-        return point.x > this.x - this.width / 2 &&
-            point.x < this.x + this.width / 2 &&
-            point.y > this.y - this.height / 2 &&
-            point.y < this.y + this.height / 2;
+        return point.x > this.position.x - this.width / 2 &&
+            point.x < this.position.x + this.width / 2 &&
+            point.y > this.position.y - this.height / 2 &&
+            point.y < this.position.y + this.height / 2;
             
     }
     fire() {
         //single aimed shot
         let player = Game.instance.player;
-        let dx = player.x - this.x;
-        let dy = player.y - this.y;
-        let angle = Math.atan2(dy, dx);
-        let bullet = new BulletPath(this.x, this.y, (t) => {
+        let slope = Vector.subtract(player.position, this.position);
+        let angle = Math.atan2(slope.y, slope.x);
+        let bullet = new BulletPath(this.position, (t) => {
             let speed = 0.4;
             return {x: speed * t * Math.cos(angle), y: speed * t * Math.sin(angle)};
         }

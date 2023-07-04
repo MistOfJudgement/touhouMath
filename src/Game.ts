@@ -25,8 +25,9 @@ export class Game {
         Game.instance = this;
         setInterval(() => {
             let enemy = new Enemy();
-            enemy.x = Math.random() * this.canvas.width;
-            enemy.y = Math.random() * this.canvas.height;
+            // enemy.x = Math.random() * this.canvas.width;
+            // enemy.y = Math.random() * this.canvas.height;
+            enemy.position = {x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height};
             this.spawn(enemy);
         }, 6000);
     }

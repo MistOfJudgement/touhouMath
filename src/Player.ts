@@ -3,11 +3,11 @@ import { Input } from "./Input";
 import { presetPaths } from ".";
 import { Game } from "./Game";
 import { Entity } from "./Entity";
+import { Point, Vector } from "./Utils";
 
 export class Player implements Entity {
     
-    x: number = 0;
-    y: number = 0;
+    position: Point = {x: 0, y: 0};
     width: number = 50;
     height: number = 50;
     color: string = "red";
@@ -25,48 +25,56 @@ export class Player implements Entity {
 
     draw(ctx: CanvasRenderingContext2D) {
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+        ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height);
     
         //draw cooldown
         if (this.cooldown > 0) {
             ctx.fillStyle = "blue";
-            ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height * (this.cooldown / this.timeBetweenShots));
+            ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height * (this.cooldown / this.timeBetweenShots));
         }
         //draw hitbox
         ctx.fillStyle = this.hitboxColor;
         ctx.beginPath();
-        ctx.arc(this.x, this.y, this.hitboxRadius, 0, 2 * Math.PI);
+        ctx.arc(this.position.x, this.position.y, this.hitboxRadius, 0, 2 * Math.PI);
         ctx.fill();
         ctx.closePath();
+
+        //draw path
+        if (this.currentPath) {
+            this.currentPath.draw(ctx);
+        }
+
     }
 
     handleMove(dt: number) {
+        let change = {x: 0, y: 0};
         if (Input.instance.getState("up")) {
-            this.y -= this.speed * dt;
+            change.y -= this.speed * dt;
         }
         if (Input.instance.getState("down")) {
-            this.y += this.speed * dt;
+            change.y += this.speed * dt;
         }
         if (Input.instance.getState("left")) {
-            this.x -= this.speed * dt;
+            change.x -= this.speed * dt;
         }
         if (Input.instance.getState("right")) {
-            this.x += this.speed * dt;
+            change.x += this.speed * dt;
         }
+        this.position = Vector.add(this.position, change);
         this.checkBounds();
     }
 
     checkBounds() {
-        if (this.x - this.width / 2 < Game.instance.bounds.x) {
-            this.x = Game.instance.bounds.x + this.width / 2;
-        } else if (this.x + this.width / 2 > Game.instance.bounds.x + Game.instance.bounds.width) {
-            this.x = Game.instance.bounds.x + Game.instance.bounds.width - this.width / 2;
+        if (this.position.x - this.width / 2 < Game.instance.bounds.x) {
+            this.position.x = Game.instance.bounds.x + this.width / 2;
+        } else if (this.position.x + this.width / 2 > Game.instance.bounds.x + Game.instance.bounds.width) {
+            this.position.x = Game.instance.bounds.x + Game.instance.bounds.width - this.width / 2;
         }
-        if (this.y - this.height / 2 < Game.instance.bounds.y) {
-            this.y = Game.instance.bounds.y + this.height / 2;
+        if (this.position.y - this.height / 2 < Game.instance.bounds.y) {
+            this.position.y = Game.instance.bounds.y + this.height / 2;
         }
-        else if (this.y + this.height / 2 > Game.instance.bounds.y + Game.instance.bounds.height) {
-            this.y = Game.instance.bounds.y + Game.instance.bounds.height - this.height / 2;
+        else if (this.position.y + this.height / 2 > Game.instance.bounds.y + Game.instance.bounds.height) {
+            this.position.y = Game.instance.bounds.y + Game.instance.bounds.height - this.height / 2;
         }
         
     }
@@ -103,11 +111,11 @@ export class Player implements Entity {
         }
         this.state = "firing";
         this.cooldown = this.timeBetweenShots;
-        this.currentPath = new BulletPath(this.x, this.y, this.selectedPath, "blue", 5);
+        this.currentPath = new BulletPath(this.position, this.selectedPath, "blue", 5);
         Game.instance.spawn(this.currentPath);
     }
 
     collides(point: { x: number; y: number; }) {
-        return Math.sqrt((point.x - this.x) ** 2 + (point.y - this.y) ** 2) < this.hitboxRadius;
+        return Math.sqrt((point.x - this.position.x) ** 2 + (point.y - this.position.y) ** 2) < this.hitboxRadius;
     }
 }

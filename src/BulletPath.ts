@@ -1,10 +1,20 @@
 import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Game } from "./Game";
-import { Point, Vector } from "./Vec2";
+import { PathFunc, Point, Vector } from "./Utils";
+
+export function drawPath(ctx: CanvasRenderingContext2D, origin: Point, pathFunc : PathFunc, length: number = 1000, color: string = "black") {
+    ctx.strokeStyle = 'black';
+    ctx.beginPath();
+    ctx.moveTo(origin.x, origin.y);
+    for (let i = 0; i < length; i+=1) {
+        let bullet = pathFunc(i);
+        ctx.lineTo(origin.x + bullet.x, origin.y + bullet.y);
+    }
+    ctx.stroke();
+}
 export class BulletPath implements Entity {
-    x: number;
-    y: number;
+    origin: Point;
     pathFunction: (t: number) => { x: number; y: number; };
     color: string;
     radius: number;
@@ -14,14 +24,13 @@ export class BulletPath implements Entity {
     spawnTimer: number = 0;
     activebullets: number[] = []; //bullet times
     timeToLive: number = 6_000;
-    constructor(x: number, y: number,
-                pathfunc: (t: number) => { x: number; y: number; }, 
+    constructor(origin: Point,
+                pathfunc: PathFunc, 
                 color: string = "blue", 
                 radius: number = 5, 
                 count: number = 5, 
                 spawnrate: number = 100) {
-        this.x = x;
-        this.y = y;
+        this.origin = origin;
         this.pathFunction = pathfunc;
         this.color = color;
         this.radius = radius;
@@ -30,25 +39,16 @@ export class BulletPath implements Entity {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        this.drawPath(ctx);
+        drawPath(ctx, this.origin, this.pathFunction, 1000, this.color);
         ctx.fillStyle = this.color;
         for (let i = 0; i < this.activebullets.length; i++) {
-            let bullet = this.pathFunction(this.activebullets[i]);
+            let bullet = this.bulletAtTime(this.activebullets[i]);
             ctx.beginPath();
-            ctx.arc(this.x + bullet.x, this.y + bullet.y, this.radius, 0, 2 * Math.PI);
+            ctx.arc(bullet.x, bullet.y, this.radius, 0, 2 * Math.PI);
             ctx.fill();
         }
     }
-    drawPath(ctx: CanvasRenderingContext2D) {
-        ctx.strokeStyle = 'black';
-        ctx.beginPath();
-        ctx.moveTo(this.x, this.y);
-        for (let i = 0; i < this.timeToLive; i+=1) {
-            let bullet = this.pathFunction(i);
-            ctx.lineTo(this.x + bullet.x, this.y + bullet.y);
-        }
-        ctx.stroke();
-    }
+    
     boundsCheck(point: Point, margin: number = 0) {
         //Checks if the point is at the edge of the screen with some margin
         return point.x < Game.instance.bounds.x - margin ||
@@ -63,10 +63,11 @@ export class BulletPath implements Entity {
         }
         for (let i = 0; i < this.activebullets.length; i++) {
             this.activebullets[i]+=dt;
+            let bullet = this.bulletAtTime(this.activebullets[i]);
             if (this.activebullets[i] > this.timeToLive) {
                 this.activebullets.splice(i, 1);
                 i--;
-            } else if (this.boundsCheck(Vector.add({x: this.x, y: this.y}, this.pathFunction(this.activebullets[i])), 40)) {
+            } else if (this.boundsCheck(bullet, 40)) {
                 this.activebullets.splice(i, 1);
                 i--;
 
@@ -78,14 +79,14 @@ export class BulletPath implements Entity {
             }
             if (this.color == "blue") {//friendly bullets collide with enemies
                 for(const enemy of Game.instance.enemies) {
-                    if (enemy.collides(Vector.add({x: this.x, y: this.y}, this.pathFunction(this.activebullets[i])))) {
+                    if (enemy.collides(bullet)) {
                         this.activebullets.splice(i, 1);
                         i--;
                         Game.instance.remove(enemy);
                     }
                 }
             } else if (this.color == "red") {//enemy bullets collide with player
-                if (Game.instance.player.collides(Vector.add({x: this.x, y: this.y}, this.pathFunction(this.activebullets[i])))) {
+                if (Game.instance.player.collides(bullet)) {
                     this.activebullets.splice(i, 1);
                     i--;
                     Game.instance.timesHit++;
@@ -109,7 +110,7 @@ export class BulletPath implements Entity {
         return this.count == 0 && this.activebullets.length == 0;
     }
 
-    bulletAt(t: number) {
-        return Vector.add({x: this.x, y: this.y}, this.pathFunction(t));
+    bulletAtTime(t: number) {
+        return Vector.add(this.origin, this.pathFunction(t));
     }
 }
