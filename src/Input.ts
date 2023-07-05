@@ -3,10 +3,15 @@ export type Action = typeof Actions[number];
 export class Input {
     mapping: {[key: string]: Action} = {
         "w": "up",
+        "up": "up",
         "s": "down",
+        "down": "down",
         "a": "left",
+        "left": "left",
         "d": "right",
-        " ": "fire"
+        "right": "right",
+        " ": "fire",
+        "z": "fire",
     }
     currentState: {[key: string]: boolean};
     previousState: {[key: string]: boolean};
