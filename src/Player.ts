@@ -20,7 +20,7 @@ export class Player implements Entity {
     hitboxColor: string = "green";
     state: "inactive" | "moving" | "firing" = "moving";
     focusing: boolean = false;
-    selectedPath: (t: number) => { x: number; y: number; } = presetPaths.straight(0, 0, 0.5);
+    selectedPath: (t: number) => { x: number; y: number; } = t=> ({x:t*Math.cos(t/250)/100, y:t*Math.sin(t/250)/100});//presetPaths.straight(0, 0, 0.5);
     currentPath: BulletPath | null = null;
     get speed() {
         return this.focusing ? this.focusSpeed : this.normalSpeed;
@@ -49,7 +49,7 @@ export class Player implements Entity {
             ctx.closePath();
         
             //draw path
-            drawPath(ctx, this.position, this.selectedPath, 1000, "black");
+            drawPath(ctx, this.position, this.selectedPath, 10_000, "black");
             drawAxis(ctx, this.position.x, this.position.y, 1000, 50, 50, "black");
         }
     }
@@ -122,6 +122,7 @@ export class Player implements Entity {
         this.state = "firing";
         this.cooldown = this.timeBetweenShots;
         this.currentPath = new BulletPath(this.position, this.selectedPath, "blue", 5);
+        this.currentPath.timeToLive = 10_000;
         Game.instance.spawn(this.currentPath);
     }
 
