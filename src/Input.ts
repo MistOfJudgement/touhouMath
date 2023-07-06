@@ -2,16 +2,16 @@ export const Actions = ["up", "down", "left", "right", "fire"] as const;
 export type Action = typeof Actions[number];
 export class Input {
     mapping: {[key: string]: Action} = {
-        "w": "up",
-        "up": "up",
-        "s": "down",
-        "down": "down",
-        "a": "left",
-        "left": "left",
-        "d": "right",
-        "right": "right",
-        " ": "fire",
-        "z": "fire",
+        "KeyW": "up",
+        "ArrowUp": "up",
+        "KeyS": "down",
+        "ArrowDown": "down",
+        "KeyA": "left",
+        "ArrowLeft": "left",
+        "KeyD": "right",
+        "ArrowRight": "right",
+        "Space": "fire",
+        "KeyZ": "fire",
     }
     currentState: {[key: string]: boolean};
     previousState: {[key: string]: boolean};
@@ -30,14 +30,14 @@ export class Input {
     }
 
     keyDown(e: KeyboardEvent) {
-        let action = this.mapping[e.key];
+        let action = this.mapping[e.code];
         if (action) {
             this.currentState[action] = true;
         }
     }
 
     keyUp(e: KeyboardEvent) {
-        let action = this.mapping[e.key];
+        let action = this.mapping[e.code];
         if (action) {
             this.currentState[action] = false;
         }
