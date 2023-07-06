@@ -1,4 +1,4 @@
-export const Actions = ["up", "down", "left", "right", "fire"] as const;
+export const Actions = ["up", "down", "left", "right", "fire", "focus"] as const;
 export type Action = typeof Actions[number];
 export class Input {
     mapping: {[key: string]: Action} = {
@@ -12,6 +12,7 @@ export class Input {
         "ArrowRight": "right",
         "Space": "fire",
         "KeyZ": "fire",
+        "ShiftLeft": "focus",
     }
     currentState: {[key: string]: boolean};
     previousState: {[key: string]: boolean};

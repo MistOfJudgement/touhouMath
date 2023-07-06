@@ -12,14 +12,19 @@ export class Player implements Entity {
     width: number = 50;
     height: number = 50;
     color: string = "red";
-    speed: number = 0.25;
+    normalSpeed: number = 0.25;
+    focusSpeed: number = 0.125;
     cooldown: number = 0;
     timeBetweenShots: number = 1000;
     hitboxRadius: number = 10;
     hitboxColor: string = "green";
     state: "inactive" | "moving" | "firing" = "moving";
+    focusing: boolean = false;
     selectedPath: (t: number) => { x: number; y: number; } = presetPaths.straight(0, 0, 0.5);
     currentPath: BulletPath | null = null;
+    get speed() {
+        return this.focusing ? this.focusSpeed : this.normalSpeed;
+    }
     constructor() {
 
     }
@@ -34,16 +39,19 @@ export class Player implements Entity {
             ctx.fillStyle = "blue";
             ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height * (this.cooldown / this.timeBetweenShots));
         }
-        //draw hitbox
-        ctx.fillStyle = this.hitboxColor;
-        ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, this.hitboxRadius, 0, 2 * Math.PI);
-        ctx.fill();
-        ctx.closePath();
 
-        //draw path
-        drawPath(ctx, this.position, this.selectedPath, 1000, "black");
-        drawAxis(ctx, this.position.x, this.position.y, 1000, 50, 50, "black");
+        if (this.focusing) {
+            //draw hitbox
+            ctx.fillStyle = this.hitboxColor;
+            ctx.beginPath();
+            ctx.arc(this.position.x, this.position.y, this.hitboxRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.closePath();
+        
+            //draw path
+            drawPath(ctx, this.position, this.selectedPath, 1000, "black");
+            drawAxis(ctx, this.position.x, this.position.y, 1000, 50, 50, "black");
+        }
     }
 
     handleMove(dt: number) {
@@ -79,6 +87,8 @@ export class Player implements Entity {
         
     }
     update(dt: number) {
+        this.focusing = Input.instance.getState("focus");
+
         switch (this.state) {
             case "inactive":
                 this.state = "moving";
