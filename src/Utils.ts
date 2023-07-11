@@ -8,3 +8,4 @@ export const Vector = {
 }
 
 export type PathFunc = (t: number) => Point;
+export type EventAction = () => void;

@@ -1,6 +1,7 @@
 import { BulletPath } from "./BulletPath";
 import { Entity } from "./Entity";
 import { Game } from "./Game";
+import { Timer } from "./Timer";
 import { Point, Vector } from "./Utils";
  
 export class Enemy implements Entity{
@@ -9,9 +10,7 @@ export class Enemy implements Entity{
     height: number = 30;
     color: string = "blue";
     speed: number = 0.15;
-    timeBetweenShots: number = 1000;
-
-    cooldown: number = 0;
+    shotTimer: Timer;
     constructor();
     constructor(spawn: Point = {x:0, y:0},
                 width: number = 30, height: number = 30,
@@ -22,7 +21,8 @@ export class Enemy implements Entity{
         this.height = height;
         this.color = color;
         this.speed = speed;
-        this.timeBetweenShots = timeBetweenShots;
+        // this.timeBetweenShots = timeBetweenShots;
+        this.shotTimer = new Timer(timeBetweenShots, () => this.fire(), true);
     }
 
     draw(ctx: CanvasRenderingContext2D): void {
@@ -35,12 +35,7 @@ export class Enemy implements Entity{
         // this.y += (Math.random() - 0.5) * this.speed * dt;
         this.position = {x: this.position.x + (Math.random() - 0.5) * this.speed * dt,
                             y: this.position.y + (Math.random() - 0.5) * this.speed * dt};
-        if (this.cooldown > 0) {
-            this.cooldown -= dt;
-        } else {
-            this.fire();
-            this.cooldown = this.timeBetweenShots;
-        }
+        this.shotTimer.update(dt);
     }
     collides(point: Point) {
         return point.x > this.position.x - this.width / 2 &&

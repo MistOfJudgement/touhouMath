@@ -1,6 +1,7 @@
 import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Game } from "./Game";
+import { Timer } from "./Timer";
 import { PathFunc, Point, Vector } from "./Utils";
 
 export function drawPath(ctx: CanvasRenderingContext2D, origin: Point, pathFunc : PathFunc, length: number = 1000, color: string = "black") {
@@ -19,11 +20,10 @@ export class BulletPath implements Entity {
     color: string;
     radius: number;
     count: number;
-    spawnrate: number;
-
-    spawnTimer: number = 0;
+    spawnTimer: Timer;
     activebullets: number[] = []; //bullet times
     timeToLive: number = 6_000;
+
     constructor(origin: Point,
                 pathfunc: PathFunc, 
                 color: string = "blue", 
@@ -35,7 +35,7 @@ export class BulletPath implements Entity {
         this.color = color;
         this.radius = radius;
         this.count = count;
-        this.spawnrate = spawnrate;
+        this.spawnTimer = new Timer(spawnrate, () => this.fire(), true);
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -94,18 +94,15 @@ export class BulletPath implements Entity {
             }
         }
 
-        if (this.count > 0) {
-            if (this.spawnTimer > 0) {
-                this.spawnTimer -= dt;
-            }
-            else {
-                this.activebullets.push(0);
-                this.spawnTimer = this.spawnrate;
-                this.count--;
-            }
+        this.spawnTimer.update(dt);
+    }
+    fire() {
+        this.activebullets.push(0);
+        this.count--;
+        if(this.count <= 0) {
+            this.spawnTimer.loop = false;
         }
     }
-
     get completed() {
         return this.count == 0 && this.activebullets.length == 0;
     }

@@ -5,6 +5,7 @@ import { Game } from "./Game";
 import { Entity } from "./Entity";
 import { Point, Vector } from "./Utils";
 import { drawAxis } from "./Axis";
+import { Timer } from "./Timer";
 
 export class Player implements Entity {
     
@@ -14,8 +15,8 @@ export class Player implements Entity {
     color: string = "red";
     normalSpeed: number = 0.25;
     focusSpeed: number = 0.125;
-    cooldown: number = 0;
     timeBetweenShots: number = 1000;
+    shotTimer: Timer;
     hitboxRadius: number = 10;
     hitboxColor: string = "green";
     state: "inactive" | "moving" | "firing" = "moving";
@@ -26,7 +27,7 @@ export class Player implements Entity {
         return this.focusing ? this.focusSpeed : this.normalSpeed;
     }
     constructor() {
-
+        this.shotTimer = new Timer(this.timeBetweenShots, () => {}, false, false);
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -35,9 +36,9 @@ export class Player implements Entity {
         ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height);
     
         //draw cooldown
-        if (this.cooldown > 0) {
+        if (this.shotTimer.active) {
             ctx.fillStyle = "blue";
-            ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height * (this.cooldown / this.timeBetweenShots));
+            ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height * this.shotTimer.percentComplete);
         }
 
         if (this.focusing) {
@@ -98,9 +99,7 @@ export class Player implements Entity {
                 if (Input.instance.justPressed("fire")) {
                     this.fire();
                 }
-                if (this.cooldown > 0) {
-                    this.cooldown -= dt;
-                }
+                this.shotTimer.update(dt);
                 break;
             case "firing":
                 if (this.currentPath) {
@@ -116,11 +115,11 @@ export class Player implements Entity {
     }
 
     fire() {
-        if (this.cooldown > 0) {
+        if (this.shotTimer.active) {
             return;
         }
         this.state = "firing";
-        this.cooldown = this.timeBetweenShots;
+        this.shotTimer.reset();
         this.currentPath = new BulletPath(this.position, this.selectedPath, "blue", 5);
         this.currentPath.timeToLive = 10_000;
         Game.instance.spawn(this.currentPath);
