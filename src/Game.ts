@@ -1,3 +1,4 @@
+import { Boss } from "./Boss";
 import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Input } from "./Input";
@@ -22,6 +23,7 @@ export class Game {
         this.player = new Player();
         this.entities.push(this.player);
         this.bounds = {x: 0, y: 0, width: this.canvas.width, height: this.canvas.height};
+        this.spawn(new Boss());
         Game.instance = this;
         setInterval(() => {
             let enemy = new Enemy();
