@@ -12,3 +12,9 @@ export const Vector = {
 
 export type PathFunc = (t: number) => Point;
 export type EventAction = () => void;
+export function lerp(a: number, b: number, t: number) {
+    return a + (b - a) * t;
+}
+export function lerpPoint(a: Point, b: Point, t: number) {
+    return {x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t)};
+}
