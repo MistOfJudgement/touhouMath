@@ -29,9 +29,13 @@ export class Timer {
     }
     reset() {
         this.currentTime = this.totalTime;
+    }
+    start() {
+        if(this.currentTime <= 0) {
+            this.currentTime = this.totalTime;
+        }
         this.active = true;
     }
-
     get percentComplete() {
         return this.currentTime / this.totalTime;
     }

@@ -14,11 +14,13 @@ export class Boss implements Entity {
     destination: Point = {x: 0, y: 0};
     prevLocation: Point = {x: 0, y: 0};
     attack: BulletPath | null = null;
-    moveTime: number = 2_000;
+    moveTime: number = 2000;
+    waitAfterAttack: number = 1000;
     attackPath: PathFunc = presetPaths.sin(0, 0, -1/4);
     waitTimer: Timer;
     constructor() {
-        this.waitTimer = new Timer(1000, () => {}, false, false);
+        this.waitTimer = new Timer(1000, () => {}, true);
+        this.startMove();
     }
     draw(ctx: CanvasRenderingContext2D): void {
         this.sprite.draw(ctx);
@@ -28,33 +30,48 @@ export class Boss implements Entity {
         ctx.fill();
         ctx.closePath();
     }
+    startAttack() {
+        this.state = "attacking";
+        this.prevLocation = this.transform.position;
+        this.attack = new BulletPath(this.transform.position, this.attackPath, "red", 5, 10, 150);
+        Game.instance.spawn(this.attack);
+        this.waitTimer.onComplete = this.startMove.bind(this);
+        this.waitTimer.totalTime = this.waitAfterAttack;
+        this.waitTimer.active = false;
+        console.log("start attack");
+        console.log(this.waitTimer);
+    }
+
+    startMove() {
+        this.state = "moving";
+        this.attack = null;
+        this.destination = {x: Math.random() * 800, y: Math.random() * 600};
+        this.waitTimer.onComplete = this.startAttack.bind(this);
+        this.waitTimer.totalTime = this.moveTime;
+        this.waitTimer.start();
+        console.log("start move");
+        console.log(this.waitTimer);
+    }
+
     update(dt: number): void {
+
         if (this.state == "moving") {
-            if(this.waitTimer.active) {
-                this.waitTimer.update(dt);
-                this.transform.position = lerpPoint(this.prevLocation, this.destination, 1-this.waitTimer.percentComplete);
-                return;
-            } else {
-                this.waitTimer.reset();
-                this.state = "attacking";
-                this.prevLocation = this.transform.position;
-            }
-            
+            this.transform.position = lerpPoint(this.prevLocation, this.destination, 1-this.waitTimer.percentComplete);
 
         } else if (this.state == "attacking") {
             if(!this.attack) {
             this.attack = new BulletPath(this.transform.position, this.attackPath, "red", 5, 10, 150);
+            this.attack = new BulletPath(this.transform.position, this.attackPath, "red", 5, 10, 150);
+                Game.instance.spawn(this.attack);
+                this.attack = new BulletPath(this.transform.position, this.attackPath, "red", 5, 10, 150);
                 Game.instance.spawn(this.attack);
             }
-            this.attack.update(dt);
             if(this.attack.count == 0) {
-                this.attack = null;
-                this.state = "moving";
-                this.destination = {x: Math.random() * 800, y: Math.random() * 600};
-                this.waitTimer.active = true;
+                this.waitTimer.start();
             }
 
         }
+        this.waitTimer.update(dt);
 
     }
 }

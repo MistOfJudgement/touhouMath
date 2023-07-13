@@ -119,7 +119,7 @@ export class Player implements Entity {
             return;
         }
         this.state = "firing";
-        this.shotTimer.reset();
+        this.shotTimer.start();
         this.currentPath = new BulletPath(this.position, this.selectedPath, "blue", 5);
         this.currentPath.timeToLive = 10_000;
         Game.instance.spawn(this.currentPath);
