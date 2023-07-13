@@ -12,7 +12,7 @@ export class Game {
     enemies : Enemy[] = [];
     entities: Entity[] = [];
     bounds: {x: number, y: number, width: number, height: number};
-    state: "playing" | "paused" = "playing";
+    state: "playing" | "paused" | "title" = "title";
     timesHit: number = 0;
     readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
@@ -21,10 +21,17 @@ export class Game {
         this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
         this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
         this.player = new Player();
-        this.entities.push(this.player);
+        // this.entities.push(this.player);
         this.bounds = {x: 0, y: 0, width: this.canvas.width, height: this.canvas.height};
-        this.spawn(new Boss());
+        // this.spawn(new Boss());
         Game.instance = this;
+        
+    }
+
+    changeToPlaying() {
+        this.state = "playing";
+        this.entities = [];
+        this.spawn(this.player);
         setInterval(() => {
             let enemy = new Enemy();
             // enemy.x = Math.random() * this.canvas.width;
@@ -32,10 +39,16 @@ export class Game {
             enemy.position = {x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height};
             this.spawn(enemy);
         }, 6000);
+        //i think using a interval here is funny
     }
 
     update(dt: number) {
         switch (this.state) {
+            case "title":
+                if(Input.instance.justPressed("fire")) {
+                    this.changeToPlaying();
+                }
+                break;
             case "playing":
                 if (dt > this.timeBeforePause) { //This might break if the game gets too laggy
                     this.state = "paused";
@@ -57,6 +70,13 @@ export class Game {
 
     draw(ctx : CanvasRenderingContext2D) {
         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        if(this.state == "title") {
+            ctx.fillStyle = "black";
+            ctx.font = "30px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("Cirno's Advanced Math Class", this.canvas.width / 2, this.canvas.height / 2);
+            ctx.fillText("Press space to start", this.canvas.width / 2, this.canvas.height / 2 + 30);
+        }
         for (let i = 0; i < this.entities.length; i++) {
             this.entities[i].draw(this.ctx);
         }
