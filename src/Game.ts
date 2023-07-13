@@ -75,7 +75,8 @@ export class Game {
             ctx.font = "30px Arial";
             ctx.textAlign = "center";
             ctx.fillText("Cirno's Advanced Math Class", this.canvas.width / 2, this.canvas.height / 2);
-            ctx.fillText("Press space to start", this.canvas.width / 2, this.canvas.height / 2 + 30);
+            ctx.fillText("WASD to move, space to shoot, shift to focus", this.canvas.width / 2, this.canvas.height / 2 + 30)
+            ctx.fillText("Press space to start", this.canvas.width / 2, this.canvas.height / 2 + 60);
         }
         for (let i = 0; i < this.entities.length; i++) {
             this.entities[i].draw(this.ctx);

@@ -18,7 +18,14 @@ export const presetPaths = {
 const body = document.querySelector("body");
 let functionBox = document.createElement("input");
 let confirmButton = document.createElement("button");
+let label = document.createElement("label");
+functionBox.setAttribute("type", "text");
+functionBox.setAttribute("id", "function");
+label.textContent = "Function: ";
+label.setAttribute("for", "function");
 confirmButton.textContent = "Load";
+body!.appendChild(document.createElement("br"));
+body!.appendChild(label);
 body!.appendChild(functionBox);
 body!.appendChild(confirmButton);
 //obviously doesn't check every value, but it checks the common ones
