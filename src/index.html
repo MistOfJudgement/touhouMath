@@ -10,5 +10,22 @@
     </head>
 <body>
     <canvas id="canvas" width="1000" height="700"></canvas>
+    <br>
+    <p>You can see the axis lines and the function path while focusing. Remember to scale your variables appropriately</p>
+    <label for="parametric">Use Parametric?</label>
+    <input type="checkbox" id="parametric">
+    <br>
+    <div id="standard">
+        <label for="function">f(x) = </label>
+        <input type="text" id="function">
+    </div>
+    <div id="param" hidden="true">
+        <label for="xFunction">x(t) = </label>
+        <input type="text" id="xFunction">
+        <br>
+        <label for="yFunction">y(t) = </label>
+        <input type="text" id="yFunction">
+    </div>
+    <button id="loadFunction">Load</button>
 </body>
 </html>
