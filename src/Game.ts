@@ -3,6 +3,7 @@ import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Input } from "./Input";
 import { Player } from "./Player";
+import { Point } from "./Utils";
 
 
 export class Game {
@@ -14,6 +15,9 @@ export class Game {
     bounds: {x: number, y: number, width: number, height: number};
     state: "playing" | "paused" | "title" = "title";
     timesHit: number = 0;
+    
+    debug: boolean = true;
+    mouse: Point = {x: 0, y: 0};
     readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
@@ -25,7 +29,9 @@ export class Game {
         this.bounds = {x: 0, y: 0, width: this.canvas.width, height: this.canvas.height};
         // this.spawn(new Boss());
         Game.instance = this;
-        
+        this.canvas.addEventListener("mousemove", (e) => {
+            this.mouse = {x: e.offsetX, y: e.offsetY};
+        });
     }
 
     changeToPlaying() {
@@ -83,6 +89,9 @@ export class Game {
         }
         this.drawHitcount(ctx);
         this.drawPauseScreen(ctx);
+        if (this.debug) {
+            this.drawCoordinates(ctx);
+        }
     }
     //hitcount is drawn at the top left
     drawHitcount(ctx: CanvasRenderingContext2D) {
@@ -99,6 +108,14 @@ export class Game {
         ctx.textAlign = "left";
         ctx.fillText("FPS: " + Math.round(1000 / dt), this.canvas.width - 120, 30);
     }
+
+    drawCoordinates(ctx: CanvasRenderingContext2D) {
+        ctx.fillStyle = "black";
+        ctx.font = "14px Arial";
+        ctx.textAlign = "left";
+        ctx.fillText("x: " + this.mouse.x + " y: " + this.mouse.y, this.mouse.x, this.mouse.y);
+    }
+
     private drawPauseScreen(ctx: CanvasRenderingContext2D) {
         if (this.state == "paused") {
             ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
