@@ -1,4 +1,5 @@
 import { Boss } from "./Boss";
+import { DialogueSystem } from "./Dialogue";
 import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Input } from "./Input";
@@ -38,6 +39,7 @@ export class Game {
         this.state = "playing";
         this.entities = [];
         this.spawn(this.player);
+        this.spawn(new DialogueSystem())
         setInterval(() => {
             let enemy = new Enemy();
             // enemy.x = Math.random() * this.canvas.width;
