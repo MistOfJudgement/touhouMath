@@ -1,5 +1,6 @@
 import { presetPaths } from ".";
 import { BulletPath } from "./BulletPath";
+import { DialogueLine, DialogueSystem } from "./Dialogue";
 import { Entity } from "./Entity";
 import { Game } from "./Game";
 import { DrawnRectSprite, Sprite } from "./Sprite";
@@ -27,16 +28,41 @@ export class Boss implements Entity {
     waitTimer: Timer;
     health: number = 100;
     maxHealth: number = 100;
-    spellcards: Spellcard[] = [YoumuSpellcard01];
-    activeSpellcard: Spellcard | null = this.spellcards[0];
+    dialogueSystem: DialogueSystem = Game.instance.dialogueSystem;
+    events: (Spellcard|DialogueLine[])[] = [];
+    currentEvent: number = 0;
     get alive() {
         return this.health > 0;
+    }
+    getCurrentEvent() {
+        return this.events[this.currentEvent];
+    }
+    nextEvent() {
+        this.currentEvent++;
+        if(this.currentEvent >= this.events.length) {
+            this.currentEvent = 0;
+        } else {
+            this.processEvent();
+        }
+    }
+    processEvent() {
+        const event = this.getCurrentEvent();
+        if (event instanceof Array) {
+            this.dialogueSystem.loadLines(event);
+            this.dialogueSystem.active = true;
+            this.dialogueSystem.onFinish = () => {
+                this.nextEvent();
+            }
+        } else {
+            this.dialogueSystem.active = false;
+            event.init(this);
+            Game.instance.tasks.push(event.update(this));
+        }
     }
     constructor() {
         this.waitTimer = new Timer(1000, () => {}, true);
         // this.startMove();
         this.waitTimer.active = false;
-        this!.activeSpellcard!.init(this);
         // Game.instance.tasks.push(this!.activeSpellcard!.update(this));
         
     }
@@ -56,20 +82,20 @@ export class Boss implements Entity {
         
     }
     startAttack() {
-        if(Game.instance.debug) {
-            this.state = "inactive";
-            Game.instance.tasks.push(this.activeSpellcard!.update(this));
-            return;
-        }
-        this.state = "attacking";
-        this.prevLocation = this.transform.position;
-        this.attack = new BulletPath(this.transform.position, this.attackPath, "red", 5, 10, 150);
-        Game.instance.spawn(this.attack);
-        this.waitTimer.onComplete = this.startMove.bind(this);
-        this.waitTimer.totalTime = this.waitAfterAttack;
-        this.waitTimer.active = false;
-        console.log("start attack");
-        console.log(this.waitTimer);
+        // if(Game.instance.debug) {
+        //     this.state = "inactive";
+        //     Game.instance.tasks.push(this.activeSpellcard!.update(this));
+        //     return;
+        // }
+        // this.state = "attacking";
+        // this.prevLocation = this.transform.position;
+        // this.attack = new BulletPath(this.transform.position, this.attackPath, "red", 5, 10, 150);
+        // Game.instance.spawn(this.attack);
+        // this.waitTimer.onComplete = this.startMove.bind(this);
+        // this.waitTimer.totalTime = this.waitAfterAttack;
+        // this.waitTimer.active = false;
+        // console.log("start attack");
+        // console.log(this.waitTimer);
     }
 
     startMove() {
@@ -112,6 +138,7 @@ export const YoumuSpellcard01: Spellcard = {
     complete: false,
     init: (boss: Boss) => {
         boss.state = "inactive";
+        Game.instance.player.state = "moving"; //TODO: AAAAAAAA I NEED A BETTER SYSTEM
     },
 
     *update(boss: Boss) : Task {

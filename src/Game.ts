@@ -1,4 +1,4 @@
-import { Boss } from "./Boss";
+import { Boss, YoumuSpellcard01 } from "./Boss";
 import { DialogueSystem } from "./Dialogue";
 import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
@@ -46,11 +46,19 @@ export class Game {
         this.spawn(boss);
         this.player.state = "inactive";
         boss.state = "inactive";
-        this.dialogueSystem.active = true;
-        this.dialogueSystem.onFinish = () => {
-            this.player.state = "moving";
-            this.startTask(boss.activeSpellcard!.update(boss));
-        };
+        boss.events = [
+            [
+                {speaker: "Cirno", text: "Hello!"},
+                {speaker: "Cirno", text: "This is a test dialogue system."},
+            ],
+            YoumuSpellcard01,
+        ];
+        boss.processEvent();
+        // this.dialogueSystem.active = true;
+        // this.dialogueSystem.onFinish = () => {
+        //     this.player.state = "moving";
+        //     this.startTask(boss.activeSpellcard!.update(boss));
+        // };
         // setInterval(() => {
         //     let enemy = new Enemy();
         //     // enemy.x = Math.random() * this.canvas.width;

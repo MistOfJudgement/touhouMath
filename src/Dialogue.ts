@@ -15,6 +15,10 @@ export class DialogueSystem implements Entity {
     currentLine: number = 0;
 
     bounds: { x: number; y: number; width: number; height: number; };
+    loadLines(lines: DialogueLine[]) {
+        this.lines = lines;
+        this.currentLine = 0;
+    }
     onFinish: EventAction = () => {};
     constructor(lines?: DialogueLine[]) {
         this.lines = lines ?? this.lines;
