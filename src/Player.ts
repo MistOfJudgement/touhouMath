@@ -7,10 +7,8 @@ import { Point, Vector } from "./Utils";
 import { drawAxis } from "./Axis";
 import { Timer } from "./Timer";
 import Transform from "./Transform";
-import { Collider } from "./Physics";
 
-export class Player implements Entity, Collider {
-    collisionLayer: "player" = "player";
+export class Player implements Entity {
     transform: Transform = {position:{x: 0, y: 0}};
     width: number = 50;
     height: number = 50;
@@ -127,13 +125,7 @@ export class Player implements Entity, Collider {
         Game.instance.spawn(this.currentPath);
     }
 
-    collides(other: Collider): boolean {
-        return Math.sqrt((other.transform.position.x - this.transform.position.x) ** 2 + (other.transform.position.y - this.transform.position.y) ** 2) < this.hitboxRadius;
-    }
-
-    onCollision(other: Collider): void {
-        if (other.collisionLayer == "enemyBullet") {
-            Game.instance.timesHit++;
-        }
+    collides(point: { x: number; y: number; }) {
+        return Math.sqrt((point.x - this.transform.position.x) ** 2 + (point.y - this.transform.position.y) ** 2) < this.hitboxRadius;
     }
 }
