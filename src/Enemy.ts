@@ -47,7 +47,7 @@ export class Enemy implements Entity{
     fire() {
         //single aimed shot
         let player = Game.instance.player;
-        let slope = Vector.subtract(player.position, this.position);
+        let slope = Vector.subtract(player.transform.position, this.position);
         let angle = Math.atan2(slope.y, slope.x);
         let bullet = new BulletPath(this.position, (t) => {
             let speed = 0.4;
