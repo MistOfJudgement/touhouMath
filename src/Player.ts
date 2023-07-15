@@ -6,10 +6,12 @@ import { Entity } from "./Entity";
 import { Point, Vector } from "./Utils";
 import { drawAxis } from "./Axis";
 import { Timer } from "./Timer";
+import Transform from "./Transform";
+import { Collider } from "./Physics";
 
-export class Player implements Entity {
-    
-    position: Point = {x: 0, y: 0};
+export class Player implements Entity, Collider {
+    collisionLayer: "player" = "player";
+    transform: Transform = {position:{x: 0, y: 0}};
     width: number = 50;
     height: number = 50;
     color: string = "red";
@@ -33,25 +35,25 @@ export class Player implements Entity {
     draw(ctx: CanvasRenderingContext2D) {
 
         ctx.fillStyle = this.color;
-        ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height);
+        ctx.fillRect(this.transform.position.x - this.width / 2, this.transform.position.y - this.height / 2, this.width, this.height);
     
         //draw cooldown
         if (this.shotTimer.active) {
             ctx.fillStyle = "blue";
-            ctx.fillRect(this.position.x - this.width / 2, this.position.y - this.height / 2, this.width, this.height * this.shotTimer.percentComplete);
+            ctx.fillRect(this.transform.position.x - this.width / 2, this.transform.position.y - this.height / 2, this.width, this.height * this.shotTimer.percentComplete);
         }
 
         if (this.focusing) {
             //draw hitbox
             ctx.fillStyle = this.hitboxColor;
             ctx.beginPath();
-            ctx.arc(this.position.x, this.position.y, this.hitboxRadius, 0, 2 * Math.PI);
+            ctx.arc(this.transform.position.x, this.transform.position.y, this.hitboxRadius, 0, 2 * Math.PI);
             ctx.fill();
             ctx.closePath();
         
             //draw path
-            drawPath(ctx, this.position, this.selectedPath, 10_000, "black");
-            drawAxis(ctx, this.position.x, this.position.y, 1000, 50, 50, "black");
+            drawPath(ctx, this.transform.position, this.selectedPath, 10_000, "black");
+            drawAxis(ctx, this.transform.position.x, this.transform.position.y, 1000, 50, 50, "black");
         }
     }
 
@@ -69,21 +71,21 @@ export class Player implements Entity {
         if (Input.instance.getState("right")) {
             change.x += this.speed * dt;
         }
-        this.position = Vector.add(this.position, change);
+        this.transform.position = Vector.add(this.transform.position, change);
         this.checkBounds();
     }
 
     checkBounds() {
-        if (this.position.x - this.width / 2 < Game.instance.bounds.x) {
-            this.position.x = Game.instance.bounds.x + this.width / 2;
-        } else if (this.position.x + this.width / 2 > Game.instance.bounds.x + Game.instance.bounds.width) {
-            this.position.x = Game.instance.bounds.x + Game.instance.bounds.width - this.width / 2;
+        if (this.transform.position.x - this.width / 2 < Game.instance.bounds.x) {
+            this.transform.position.x = Game.instance.bounds.x + this.width / 2;
+        } else if (this.transform.position.x + this.width / 2 > Game.instance.bounds.x + Game.instance.bounds.width) {
+            this.transform.position.x = Game.instance.bounds.x + Game.instance.bounds.width - this.width / 2;
         }
-        if (this.position.y - this.height / 2 < Game.instance.bounds.y) {
-            this.position.y = Game.instance.bounds.y + this.height / 2;
+        if (this.transform.position.y - this.height / 2 < Game.instance.bounds.y) {
+            this.transform.position.y = Game.instance.bounds.y + this.height / 2;
         }
-        else if (this.position.y + this.height / 2 > Game.instance.bounds.y + Game.instance.bounds.height) {
-            this.position.y = Game.instance.bounds.y + Game.instance.bounds.height - this.height / 2;
+        else if (this.transform.position.y + this.height / 2 > Game.instance.bounds.y + Game.instance.bounds.height) {
+            this.transform.position.y = Game.instance.bounds.y + Game.instance.bounds.height - this.height / 2;
         }
         
     }
@@ -120,12 +122,18 @@ export class Player implements Entity {
         }
         this.state = "firing";
         this.shotTimer.start();
-        this.currentPath = new BulletPath(this.position, this.selectedPath, "blue", 5);
+        this.currentPath = new BulletPath(this.transform.position, this.selectedPath, "blue", 5);
         this.currentPath.timeToLive = 10_000;
         Game.instance.spawn(this.currentPath);
     }
 
-    collides(point: { x: number; y: number; }) {
-        return Math.sqrt((point.x - this.position.x) ** 2 + (point.y - this.position.y) ** 2) < this.hitboxRadius;
+    collides(other: Collider): boolean {
+        return Math.sqrt((other.transform.position.x - this.transform.position.x) ** 2 + (other.transform.position.y - this.transform.position.y) ** 2) < this.hitboxRadius;
+    }
+
+    onCollision(other: Collider): void {
+        if (other.collisionLayer == "enemyBullet") {
+            Game.instance.timesHit++;
+        }
     }
 }
