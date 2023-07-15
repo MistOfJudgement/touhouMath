@@ -1,8 +1,10 @@
 import { Boss, YoumuSpellcard01 } from "./Boss";
+import { BulletPath } from "./BulletPath";
 import { DialogueSystem } from "./Dialogue";
 import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Input } from "./Input";
+import { PhysicsSystem } from "./Physics";
 import { Player } from "./Player";
 import { Point, Task } from "./Utils";
 
@@ -20,18 +22,21 @@ export class Game {
     debug: boolean = true;
     mouse: Point = {x: 0, y: 0};
     tasks: Task[] = [];
+    physicsSystem: PhysicsSystem;
     readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
     dialogueSystem: DialogueSystem = new DialogueSystem();
     constructor() {
+        Game.instance = this;
+
         this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
         this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
         this.player = new Player();
+        this.physicsSystem = new PhysicsSystem();
         // this.entities.push(this.player);
         this.bounds = {x: 0, y: 0, width: this.canvas.width, height: this.canvas.height};
         // this.spawn(new Boss());
-        Game.instance = this;
         this.canvas.addEventListener("mousemove", (e) => {
             this.mouse = {x: e.offsetX, y: e.offsetY};
         });
@@ -90,6 +95,7 @@ export class Game {
                         i--;
                     }
                 }
+                this.physicsSystem.update(dt);
                 break;
             case "paused":
                 if(Input.instance.justPressed("fire")) {
@@ -169,9 +175,12 @@ export class Game {
 
     spawn(entity: Entity) {
         this.entities.push(entity);
-        if (entity instanceof Enemy) {
-            this.enemies.push(entity);
+        if(entity instanceof Enemy || entity instanceof BulletPath || entity instanceof Boss) {
+            this.physicsSystem.add(entity);
         }
+        // if (entity instanceof Enemy) {
+        //     this.enemies.push(entity);
+        // }
     }
 
     remove(entity: Entity) {
@@ -179,11 +188,8 @@ export class Game {
         if (index > -1) {
             this.entities.splice(index, 1);
         }
-        if (entity instanceof Enemy) {
-            index = this.enemies.indexOf(entity);
-            if (index > -1) {
-                this.enemies.splice(index, 1);
-            }
+        if(entity instanceof Enemy || entity instanceof BulletPath || entity instanceof Boss) {
+            this.physicsSystem.remove(entity);
         }
     }
 

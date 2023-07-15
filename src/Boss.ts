@@ -16,8 +16,10 @@ type Spellcard = {
     
 
 export class Boss implements Entity {
+    width: number = 50;
+    height: number = 50;
     transform: Transform = new Transform({x: 80, y: 80});
-    sprite: Sprite = new DrawnRectSprite(this.transform, 50, 50, "green");
+    sprite: Sprite = new DrawnRectSprite(this.transform, this.width, this.height, "green");
     state: "inactive" | "moving" | "attacking" = "inactive";
     destination: Point = {x: 0, y: 0};
     prevLocation: Point = {x: 0, y: 0};
@@ -129,6 +131,14 @@ export class Boss implements Entity {
         }
         this.waitTimer.update(dt);
 
+    }
+
+    collides(point: Point) {
+        return point.x > this.transform.position.x - this.width / 2 &&
+            point.x < this.transform.position.x + this.width / 2 &&
+            point.y > this.transform.position.y - this.height / 2 &&
+            point.y < this.transform.position.y + this.height / 2;
+            
     }
 }
 

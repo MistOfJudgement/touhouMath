@@ -11,6 +11,7 @@ export class Enemy implements Entity{
     color: string = "blue";
     speed: number = 0.15;
     shotTimer: Timer;
+    health: number = 100;
     constructor();
     constructor(spawn: Point = {x:0, y:0},
                 width: number = 30, height: number = 30,

@@ -23,7 +23,8 @@ export class BulletPath implements Entity {
     spawnTimer: Timer;
     activebullets: number[] = []; //bullet times
     timeToLive: number = 6_000;
-
+    friendly: boolean = true;
+    damage: number = 1;
     constructor(origin: Point,
                 pathfunc: PathFunc, 
                 color: string = "blue", 
@@ -36,6 +37,9 @@ export class BulletPath implements Entity {
         this.radius = radius;
         this.count = count;
         this.spawnTimer = new Timer(spawnrate, () => this.fire(), true);
+        if(color == "red") {
+            this.friendly = false;
+        }//TODO remove this im tired
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -109,5 +113,9 @@ export class BulletPath implements Entity {
 
     bulletAtTime(t: number) {
         return Vector.add(this.origin, this.pathFunction(t));
+    }
+
+    get points() {
+        return this.activebullets.map(t => this.bulletAtTime(t));
     }
 }
