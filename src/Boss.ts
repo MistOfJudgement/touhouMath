@@ -10,7 +10,7 @@ import { PathFunc, Point, Vector, lerpPoint } from "./Utils";
 export class Boss implements Entity {
     transform: Transform = new Transform({x: 80, y: 80});
     sprite: Sprite = new DrawnRectSprite(this.transform, 50, 50, "green");
-    state: "moving" | "attacking" = "moving";
+    state: "inactive" | "moving" | "attacking" = "inactive";
     destination: Point = {x: 0, y: 0};
     prevLocation: Point = {x: 0, y: 0};
     attack: BulletPath | null = null;
@@ -18,6 +18,10 @@ export class Boss implements Entity {
     waitAfterAttack: number = 1000;
     attackPath: PathFunc = presetPaths.sin(0, 0, -1/4);
     waitTimer: Timer;
+    health: number = 100;
+    get alive() {
+        return this.health > 0;
+    }
     constructor() {
         this.waitTimer = new Timer(1000, () => {}, true);
         this.startMove();
@@ -54,7 +58,7 @@ export class Boss implements Entity {
     }
 
     update(dt: number): void {
-
+        if (this.state == "inactive") return;
         if (this.state == "moving") {
             this.transform.position = lerpPoint(this.prevLocation, this.destination, 1-this.waitTimer.percentComplete);
 

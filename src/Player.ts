@@ -92,7 +92,7 @@ export class Player implements Entity {
 
         switch (this.state) {
             case "inactive":
-                this.state = "moving";
+                // this.state = "moving";
                 break;
             case "moving":
                 this.handleMove(dt);

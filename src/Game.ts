@@ -16,12 +16,13 @@ export class Game {
     bounds: {x: number, y: number, width: number, height: number};
     state: "playing" | "paused" | "title" = "title";
     timesHit: number = 0;
-    
+
     debug: boolean = true;
     mouse: Point = {x: 0, y: 0};
     readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
+    dialogueSystem: DialogueSystem = new DialogueSystem();
     constructor() {
         this.canvas = document.getElementById("canvas") as HTMLCanvasElement;
         this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
@@ -39,15 +40,24 @@ export class Game {
         this.state = "playing";
         this.entities = [];
         this.spawn(this.player);
-        this.spawn(new DialogueSystem())
-        setInterval(() => {
-            let enemy = new Enemy();
-            // enemy.x = Math.random() * this.canvas.width;
-            // enemy.y = Math.random() * this.canvas.height;
-            enemy.position = {x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height};
-            this.spawn(enemy);
-        }, 6000);
-        //i think using a interval here is funny
+        this.spawn(this.dialogueSystem)
+        const boss = new Boss();
+        this.spawn(boss);
+        this.player.state = "inactive";
+        boss.state = "inactive";
+        this.dialogueSystem.active = true;
+        this.dialogueSystem.onFinish = () => {
+            this.player.state = "moving";
+            boss.startMove();
+        };
+        // setInterval(() => {
+        //     let enemy = new Enemy();
+        //     // enemy.x = Math.random() * this.canvas.width;
+        //     // enemy.y = Math.random() * this.canvas.height;
+        //     enemy.position = {x: Math.random() * this.canvas.width, y: Math.random() * this.canvas.height};
+        //     this.spawn(enemy);
+        // }, 6000);
+        //i think using a interval here is funny for debugging
     }
 
     update(dt: number) {
