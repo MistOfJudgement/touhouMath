@@ -26,6 +26,7 @@ export class Boss implements Entity {
     attackPath: PathFunc = presetPaths.sin(0, 0, -1/4);
     waitTimer: Timer;
     health: number = 100;
+    maxHealth: number = 100;
     spellcards: Spellcard[] = [YoumuSpellcard01];
     activeSpellcard: Spellcard | null = this.spellcards[0];
     get alive() {
@@ -35,6 +36,8 @@ export class Boss implements Entity {
         this.waitTimer = new Timer(1000, () => {}, true);
         // this.startMove();
         this.waitTimer.active = false;
+        this!.activeSpellcard!.init(this);
+        // Game.instance.tasks.push(this!.activeSpellcard!.update(this));
         
     }
     draw(ctx: CanvasRenderingContext2D): void {
@@ -44,6 +47,13 @@ export class Boss implements Entity {
         ctx.arc(this.destination.x, this.destination.y, 5, 0, 2 * Math.PI);
         ctx.fill();
         ctx.closePath();
+
+        //healthbar is on the right side of the screen
+        const height = ctx.canvas.height;
+        const width = 5;
+        ctx.fillStyle = "red";
+        ctx.fillRect(ctx.canvas.width - width, 0, width, height * (this.health / this.maxHealth));
+        
     }
     startAttack() {
         if(Game.instance.debug) {

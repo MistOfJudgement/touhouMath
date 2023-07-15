@@ -49,7 +49,7 @@ export class Game {
         this.dialogueSystem.active = true;
         this.dialogueSystem.onFinish = () => {
             this.player.state = "moving";
-            boss.startMove();
+            this.startTask(boss.activeSpellcard!.update(boss));
         };
         // setInterval(() => {
         //     let enemy = new Enemy();
