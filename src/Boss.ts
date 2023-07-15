@@ -5,7 +5,14 @@ import { Game } from "./Game";
 import { DrawnRectSprite, Sprite } from "./Sprite";
 import { Timer } from "./Timer";
 import Transform from "./Transform";
-import { PathFunc, Point, Vector, lerpPoint } from "./Utils";
+import { PathFunc, Point, Task, Vector, lerpPoint } from "./Utils";
+type Spellcard = {
+    name: string,
+    complete: boolean,
+    init: (boss: Boss) => void,
+    update: (boss: Boss) => Task
+}
+    
 
 export class Boss implements Entity {
     transform: Transform = new Transform({x: 80, y: 80});
@@ -19,12 +26,16 @@ export class Boss implements Entity {
     attackPath: PathFunc = presetPaths.sin(0, 0, -1/4);
     waitTimer: Timer;
     health: number = 100;
+    spellcards: Spellcard[] = [YoumuSpellcard01];
+    activeSpellcard: Spellcard | null = this.spellcards[0];
     get alive() {
         return this.health > 0;
     }
     constructor() {
         this.waitTimer = new Timer(1000, () => {}, true);
-        this.startMove();
+        // this.startMove();
+        this.waitTimer.active = false;
+        
     }
     draw(ctx: CanvasRenderingContext2D): void {
         this.sprite.draw(ctx);
@@ -35,6 +46,11 @@ export class Boss implements Entity {
         ctx.closePath();
     }
     startAttack() {
+        if(Game.instance.debug) {
+            this.state = "inactive";
+            Game.instance.tasks.push(this.activeSpellcard!.update(this));
+            return;
+        }
         this.state = "attacking";
         this.prevLocation = this.transform.position;
         this.attack = new BulletPath(this.transform.position, this.attackPath, "red", 5, 10, 150);
@@ -78,4 +94,43 @@ export class Boss implements Entity {
         this.waitTimer.update(dt);
 
     }
+}
+
+
+
+
+function *wait(time: number) : Task {
+    let counter = time;
+    while(counter > 0) {
+        counter -= yield;
+    }
+}
+
+function *moveTo(transform: Transform, destination: Point, time: number) : Task {
+    let counter = time;
+    let start = transform.position;
+    while(counter > 0) {
+        counter -= yield;
+        transform.position = lerpPoint(start, destination, 1-counter/time);
+    }
+}
+export const YoumuSpellcard01: Spellcard = {
+    name: "Linear Slash [y=0]",
+    complete: false,
+    init: (boss: Boss) => {
+        boss.state = "inactive";
+    },
+
+    *update(boss: Boss) : Task {
+        let t = 0;
+        while(true) {
+            yield *wait(1000);
+            let attack = new BulletPath(boss.transform.position, presetPaths.straight(0, 0, -1/4), "red", 5, 10, 150);
+            Game.instance.spawn(attack);
+            yield *wait(1000);
+            // boss.transform.position = {x: Math.random() * 800, y: Math.random() * 600};
+            Game.instance.tasks.push(moveTo(boss.transform, {x: Math.random() * 800, y: Math.random() * 600}, 500));
+        }
+    }
+
 }

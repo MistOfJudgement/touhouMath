@@ -18,3 +18,5 @@ export function lerp(a: number, b: number, t: number) {
 export function lerpPoint(a: Point, b: Point, t: number) {
     return {x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t)};
 }
+
+export type Task = Generator<void, void, number>;

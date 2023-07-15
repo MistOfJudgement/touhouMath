@@ -4,7 +4,7 @@ import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Input } from "./Input";
 import { Player } from "./Player";
-import { Point } from "./Utils";
+import { Point, Task } from "./Utils";
 
 
 export class Game {
@@ -19,6 +19,7 @@ export class Game {
 
     debug: boolean = true;
     mouse: Point = {x: 0, y: 0};
+    tasks: Task[] = [];
     readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
@@ -74,6 +75,12 @@ export class Game {
                 }
                 for (let i = 0; i < this.entities.length; i++) {
                     this.entities[i].update(dt);
+                }
+                for (let i = 0; i < this.tasks.length; i++) {
+                    if (this.tasks[i].next(dt).done) {
+                        this.tasks.splice(i, 1);
+                        i--;
+                    }
                 }
                 break;
             case "paused":
@@ -170,5 +177,9 @@ export class Game {
                 this.enemies.splice(index, 1);
             }
         }
+    }
+
+    startTask(task: Task) {
+        this.tasks.push(task);
     }
 }
