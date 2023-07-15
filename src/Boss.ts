@@ -5,7 +5,7 @@ import { Game } from "./Game";
 import { DrawnRectSprite, Sprite } from "./Sprite";
 import { Timer } from "./Timer";
 import Transform from "./Transform";
-import { PathFunc, Point, Task, Vector, lerpPoint } from "./Utils";
+import { PathFunc, Point, Task, Vector, lerpPoint, wait, moveTo } from "./Utils";
 type Spellcard = {
     name: string,
     complete: boolean,
@@ -97,23 +97,6 @@ export class Boss implements Entity {
 }
 
 
-
-
-function *wait(time: number) : Task {
-    let counter = time;
-    while(counter > 0) {
-        counter -= yield;
-    }
-}
-
-function *moveTo(transform: Transform, destination: Point, time: number) : Task {
-    let counter = time;
-    let start = transform.position;
-    while(counter > 0) {
-        counter -= yield;
-        transform.position = lerpPoint(start, destination, 1-counter/time);
-    }
-}
 export const YoumuSpellcard01: Spellcard = {
     name: "Linear Slash [y=0]",
     complete: false,
