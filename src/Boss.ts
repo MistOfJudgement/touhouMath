@@ -82,6 +82,15 @@ export class Boss implements Entity {
         ctx.fillStyle = "red";
         ctx.fillRect(ctx.canvas.width - width, 0, width, height * (this.health / this.maxHealth));
         
+        //spellcard name is on the right under the fps counter
+        let event = this.getCurrentEvent() as any;
+        if(event.name) {
+            event = event as Spellcard;
+            
+            ctx.fillStyle = "black";
+            ctx.font = "20px Arial";
+            ctx.fillText(event.name, ctx.canvas.width - ctx.measureText(event.name).width - 10, 50);
+        }
     }
     startAttack() {
         // if(Game.instance.debug) {
