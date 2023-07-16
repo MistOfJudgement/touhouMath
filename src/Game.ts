@@ -21,7 +21,7 @@ export class Game {
 
     debug: boolean = true;
     mouse: Point = {x: 0, y: 0};
-    tasks: Task[] = [];
+    tasks: {source: any, task: Task}[] = [];
     physicsSystem: PhysicsSystem;
     readonly timeBeforePause: number = 400;
     private lastTimestamp: DOMHighResTimeStamp = 0;
@@ -49,14 +49,21 @@ export class Game {
         this.spawn(this.dialogueSystem)
         const boss = new Boss();
         this.spawn(boss);
+        boss.maxHealth = 5;
+        boss.health = 5;
         this.player.state = "inactive";
         boss.state = "inactive";
         boss.events = [
-            [
-                {speaker: "Cirno", text: "Hello!"},
-                {speaker: "Cirno", text: "This is a test dialogue system."},
-            ],
+            {speaker: "Cirno", text: "Hello!"},
+            {speaker: "Cirno", text: "This is a test dialogue system."},
             YoumuSpellcard01,
+            () => {this.player.state = "inactive";
+                this.clearBulletPaths();
+
+                    this.clearTasks(boss);
+                },
+            {speaker: "Cirno", text: "That's all for now!"},
+
         ];
         boss.processEvent();
         // this.dialogueSystem.active = true;
@@ -73,7 +80,12 @@ export class Game {
         // }, 6000);
         //i think using a interval here is funny for debugging
     }
-
+    changeToTitle() {
+        this.state = "title";
+        this.entities = [];
+        this.physicsSystem.reset();
+        this.tasks = [];
+    }
     update(dt: number) {
         switch (this.state) {
             case "title":
@@ -90,7 +102,7 @@ export class Game {
                     this.entities[i].update(dt);
                 }
                 for (let i = 0; i < this.tasks.length; i++) {
-                    if (this.tasks[i].next(dt).done) {
+                    if (this.tasks[i].task.next(dt).done) {
                         this.tasks.splice(i, 1);
                         i--;
                     }
@@ -193,7 +205,15 @@ export class Game {
         }
     }
 
-    startTask(task: Task) {
-        this.tasks.push(task);
+    startTask(origin: any, task: Task) {
+        this.tasks.push({source: origin, task: task});
+    }
+
+    clearTasks(origin: any) {
+        this.tasks = this.tasks.filter(task => task.source != origin);
+    }
+    clearBulletPaths() {
+        this.physicsSystem.reset();
+        this.entities = this.entities.filter(entity => !(entity instanceof BulletPath));
     }
 }

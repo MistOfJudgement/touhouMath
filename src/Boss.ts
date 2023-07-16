@@ -31,7 +31,7 @@ export class Boss implements Entity {
     health: number = 100;
     maxHealth: number = 100;
     dialogueSystem: DialogueSystem = Game.instance.dialogueSystem;
-    events: (Spellcard|DialogueLine[])[] = [];
+    events: (Spellcard|DialogueLine|Function)[] = [];
     currentEvent: number = 0;
     get alive() {
         return this.health > 0;
@@ -43,22 +43,28 @@ export class Boss implements Entity {
         this.currentEvent++;
         if(this.currentEvent >= this.events.length) {
             this.currentEvent = 0;
+            Game.instance.changeToTitle();
         } else {
             this.processEvent();
         }
     }
     processEvent() {
-        const event = this.getCurrentEvent();
-        if (event instanceof Array) {
-            this.dialogueSystem.loadLines(event);
+        let event = this.getCurrentEvent();
+        if ("speaker" in event) {
+            event = event as DialogueLine;
+            this.dialogueSystem.loadSingleLine(event);
             this.dialogueSystem.active = true;
             this.dialogueSystem.onFinish = () => {
                 this.nextEvent();
             }
+        } else if(event instanceof Function) {
+            event();
+            this.nextEvent();
         } else {
+            event = event as Spellcard;
             this.dialogueSystem.active = false;
             event.init(this);
-            Game.instance.tasks.push(event.update(this));
+            Game.instance.startTask(this, event.update(this));
         }
     }
     constructor() {
@@ -168,7 +174,7 @@ export const YoumuSpellcard01: Spellcard = {
             Game.instance.spawn(attack);
             yield *wait(1000);
             // boss.transform.position = {x: Math.random() * 800, y: Math.random() * 600};
-            Game.instance.tasks.push(moveTo(boss.transform, {x: Math.random() * 800, y: Math.random() * 600}, 500));
+            Game.instance.startTask(this, moveTo(boss.transform, {x: Math.random() * 800, y: Math.random() * 600}, 500));
         }
     }
 

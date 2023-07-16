@@ -15,6 +15,12 @@ export class PhysicsSystem {
     constructor() {
         this.player = Game.instance.player;
     }
+
+    reset() {
+        this.enemies = [];
+        this.friendlyBullets = [];
+        this.enemyBullets = [];
+    }
     add(entity: PhysicsEntity) {
         if(entity instanceof Enemy || entity instanceof Boss) {
             this.addEnemy(entity);
@@ -75,11 +81,8 @@ export class PhysicsSystem {
                             if(this.enemies[j] instanceof Enemy) {
                                 Game.instance.remove(this.enemies[j]);
                             } else if (this.enemies[j] instanceof Boss) {
-
+                                //kill boss
                                 (this.enemies[j] as Boss).nextEvent();
-                                if((this.enemies[j] as Boss).currentEvent == 0) {
-                                    //TODO do smth
-                                }
                             }
                         }
                         path.activebullets.splice(i, 1);
