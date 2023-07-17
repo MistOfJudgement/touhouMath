@@ -3,7 +3,7 @@ import { Input } from "./Input";
 import { presetPaths } from ".";
 import { Game } from "./Game";
 import { Entity } from "./Entity";
-import { Point, Vector } from "./Utils";
+import { Point, Task, Vector, clamp } from "./Utils";
 import { drawAxis } from "./Axis";
 import { Timer } from "./Timer";
 import Transform from "./Transform";
@@ -23,11 +23,14 @@ export class Player implements Entity {
     focusing: boolean = false;
     selectedPath: (t: number) => { x: number; y: number; } = t=> ({x:t*Math.cos(t/250)/100, y:t*Math.sin(t/250)/100});//presetPaths.straight(0, 0, 0.5);
     currentPath: BulletPath | null = null;
+    expandCounter = 0;
+
     get speed() {
         return this.focusing ? this.focusSpeed : this.normalSpeed;
     }
     constructor() {
         this.shotTimer = new Timer(this.timeBetweenShots, () => {}, false, false);
+        Game.instance.startTask(this, this.Tdraw(Game.instance.ctx));
     }
 
     draw(ctx: CanvasRenderingContext2D) {
@@ -40,6 +43,7 @@ export class Player implements Entity {
             ctx.fillStyle = "blue";
             ctx.fillRect(this.transform.position.x - this.width / 2, this.transform.position.y - this.height / 2, this.width, this.height * this.shotTimer.percentComplete);
         }
+        drawPath(ctx, this.transform.position, this.selectedPath, 0, this.expandCounter, 1, "black");
 
         if (this.focusing) {
             //draw hitbox
@@ -50,11 +54,22 @@ export class Player implements Entity {
             ctx.closePath();
         
             //draw path
-            drawPath(ctx, this.transform.position, this.selectedPath, 10_000, "black");
+            // drawPath(ctx, this.transform.position, this.selectedPath, 0, 10_000, "black");
+
             drawAxis(ctx, this.transform.position.x, this.transform.position.y, 1000, 50, 50, "black");
         }
     }
-
+    *Tdraw(ctx: CanvasRenderingContext2D): Task {
+        while(true) {
+            let dt = yield;
+            if (this.focusing) {
+                this.expandCounter+= dt*5;
+            } else {
+                this.expandCounter-= dt*5;
+            }
+            this.expandCounter = clamp(this.expandCounter, 0, 10_000);
+        }
+    }
     handleMove(dt: number) {
         let change = {x: 0, y: 0};
         if (Input.instance.getState("up")) {

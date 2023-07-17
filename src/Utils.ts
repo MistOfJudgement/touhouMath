@@ -65,3 +65,6 @@ export function *moveToEase(transform: Transform, destination: Point, time: numb
 export function randomPoint(bounds: {x: number, y: number, width: number, height: number}) : Point {
     return {x: bounds.x + Math.random() * bounds.width, y: bounds.y + Math.random() * bounds.height};
 }
+export function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
+}

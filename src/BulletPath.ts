@@ -4,11 +4,11 @@ import { Game } from "./Game";
 import { Timer } from "./Timer";
 import { PathFunc, Point, Vector } from "./Utils";
 
-export function drawPath(ctx: CanvasRenderingContext2D, origin: Point, pathFunc : PathFunc, length: number = 1000, color: string = "black") {
+export function drawPath(ctx: CanvasRenderingContext2D, origin: Point, pathFunc : PathFunc, start: number, end:number, increment: number =1, color: string = "black") {
     ctx.strokeStyle = 'black';
-    ctx.beginPath();
     ctx.moveTo(origin.x, origin.y);
-    for (let i = 0; i < length; i+=1) {
+    ctx.beginPath();
+    for (let i = start; i < end; i+=1) {
         let bullet = pathFunc(i);
         ctx.lineTo(origin.x + bullet.x, origin.y + bullet.y);
     }
@@ -43,7 +43,7 @@ export class BulletPath implements Entity {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        drawPath(ctx, this.origin, this.pathFunction, 1000, this.color);
+        drawPath(ctx, this.origin, this.pathFunction, Math.min(...this.activebullets), Math.max(...this.activebullets)+this.spawnTimer.totalTime, 1, this.color);
         ctx.fillStyle = this.color;
         for (let i = 0; i < this.activebullets.length; i++) {
             let bullet = this.bulletAtTime(this.activebullets[i]);
