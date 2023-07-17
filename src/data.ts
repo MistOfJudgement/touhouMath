@@ -3,7 +3,7 @@ import { Spellcard, Boss } from "./Boss";
 import { presetPaths } from ".";
 import { BulletPath } from "./BulletPath";
 import { Game } from "./Game";
-import { Task, wait, moveTo, randomPoint, waitUntil } from "./Utils";
+import { Task, wait, moveTo, randomPoint, waitUntil, moveToEase, Easing } from "./Utils";
 
 
 export const YoumuSpellcard01: Spellcard = {
@@ -40,7 +40,7 @@ export const LyricaSpellcard01: Spellcard = {
             yield* wait(1000);
             const bossLine = 500;
             //random spot
-            Game.instance.startTask(this, moveTo(boss.transform, randomPoint({x: bossLine, y: 0, width: Game.instance.bounds.width-bossLine, height: Game.instance.bounds.height}), 1000));
+            Game.instance.startTask(this, moveToEase(boss.transform, randomPoint({x: bossLine, y: 0, width: Game.instance.bounds.width-bossLine, height: Game.instance.bounds.height}), 1000, Easing.easeOutCubic));
             yield* wait(1000);
             let attack = new BulletPath(boss.transform.position, presetPaths.sin(-1 / 8, 50, 50), "red", 5, 10, 150);
             Game.instance.spawn(attack);
