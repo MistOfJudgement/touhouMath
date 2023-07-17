@@ -220,7 +220,8 @@ export class Game {
         this.tasks = this.tasks.filter(task => task.source != origin);
     }
     clearBulletPaths() {
-        this.physicsSystem.reset();
+        this.physicsSystem.enemyBullets = [];
+        this.physicsSystem.friendlyBullets = [];
         this.entities = this.entities.filter(entity => !(entity instanceof BulletPath));
     }
 }

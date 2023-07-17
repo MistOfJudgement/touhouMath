@@ -63,6 +63,7 @@ export class Boss implements Entity {
         } else {
             event = event as Spellcard;
             this.dialogueSystem.active = false;
+            this.health = this.maxHealth;
             event.init(this);
             Game.instance.startTask(this, event.update(this));
         }
