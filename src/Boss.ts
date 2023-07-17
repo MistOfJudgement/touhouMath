@@ -6,8 +6,8 @@ import { Game } from "./Game";
 import { DrawnRectSprite, Sprite } from "./Sprite";
 import { Timer } from "./Timer";
 import Transform from "./Transform";
-import { PathFunc, Point, Task, Vector, lerpPoint, wait, moveTo } from "./Utils";
-type Spellcard = {
+import { PathFunc, Point, Task, Vector, lerpPoint } from "./Utils";
+export type Spellcard = {
     name: string,
     complete: boolean,
     init: (boss: Boss) => void,
@@ -158,24 +158,3 @@ export class Boss implements Entity {
 }
 
 
-export const YoumuSpellcard01: Spellcard = {
-    name: "Linear Slash [y=0]",
-    complete: false,
-    init: (boss: Boss) => {
-        boss.state = "inactive";
-        Game.instance.player.state = "moving"; //TODO: AAAAAAAA I NEED A BETTER SYSTEM
-    },
-
-    *update(boss: Boss) : Task {
-        let t = 0;
-        while(true) {
-            yield *wait(1000);
-            let attack = new BulletPath(boss.transform.position, presetPaths.straight(0, 0, -1/4), "red", 5, 10, 150);
-            Game.instance.spawn(attack);
-            yield *wait(1000);
-            // boss.transform.position = {x: Math.random() * 800, y: Math.random() * 600};
-            Game.instance.startTask(this, moveTo(boss.transform, {x: Math.random() * 800, y: Math.random() * 600}, 500));
-        }
-    }
-
-}

@@ -1,4 +1,5 @@
-import { Boss, YoumuSpellcard01 } from "./Boss";
+import { Boss } from "./Boss";
+import { LyricaSpellcard01, YoumuSpellcard01 } from "./data";
 import { BulletPath } from "./BulletPath";
 import { DialogueSystem } from "./Dialogue";
 import { Enemy } from "./Enemy";
@@ -62,6 +63,12 @@ export class Game {
 
                     this.clearTasks(boss);
                 },
+            {speaker: "Cirno", text: "Try this trig function!"},
+            LyricaSpellcard01,
+            () => {this.player.state = "inactive";
+                this.clearBulletPaths();
+                this.clearTasks(boss);
+            },
             {speaker: "Cirno", text: "That's all for now!"},
 
         ];

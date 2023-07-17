@@ -39,7 +39,11 @@ export function *wait(time: number) : Task {
         counter -= yield;
     }
 }
-
+export function *waitUntil(condition: () => boolean) : Task {
+    while(!condition()) {
+        yield;
+    }
+}
 export function *moveTo(transform: Transform, destination: Point, time: number) : Task {
     let counter = time;
     let start = transform.position;
