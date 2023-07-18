@@ -74,6 +74,7 @@ export class Game {
                 this.clearBulletPaths();
                 this.clearTasks(boss);
             },
+            {speaker: "debug", text: "debugging"},
             LyricaSpellcard02
 
         ];

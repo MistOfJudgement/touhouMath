@@ -1,6 +1,7 @@
 
 export function drawAxis(ctx: CanvasRenderingContext2D, x: number, y: number, length: number, xScale: number = 50, yScale: number = 50, color: string = "black") {
     //draw x axis
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(x - length, y);
     ctx.lineTo(x + length, y);

@@ -1,7 +1,7 @@
 import { Spellcard, Boss } from "./Boss";
 
 import { presetPaths } from ".";
-import { BulletPath } from "./BulletPath";
+import { BulletPath, Laser } from "./BulletPath";
 import { Game } from "./Game";
 import { Task, wait, moveTo, randomPoint, waitUntil, moveToEase, Easing } from "./Utils";
 
@@ -81,17 +81,18 @@ export const LyricaSpellcard02: Spellcard = {
     },
     *update(boss: Boss): Task {
         while(true) {
-            let tangentAttack = new BulletPath(boss.transform.position, presetPaths.tan(-1 / 8, 50, 50), "red", 5, (1000/10)*5, 10);
-            tangentAttack.doBoundsCheck = false;
+            let tangentAttack = new Laser(boss.transform.position, presetPaths.tan(-1 / 16, 50, 100));
+            tangentAttack.TimeToLive = 10000;
+            tangentAttack.spawnTimer.start();
             Game.instance.spawn(tangentAttack);
             yield* wait(4000);
-            Game.instance.startTask(this, moveToEase(boss.transform, randomPoint(Game.instance.bounds), 300, Easing.easeOutCubic));
-            yield* wait(300);
-            Game.instance.startTask(this, moveToEase(boss.transform, randomPoint(Game.instance.bounds), 300, Easing.easeOutCubic));
-            yield* wait(300);
-            Game.instance.startTask(this, moveToEase(boss.transform, randomPoint(Game.instance.bounds), 300, Easing.easeOutCubic));
-            yield* wait(300);
-            yield* waitUntil(() => tangentAttack.count === 0);
+            for(let i = 0; i < 4; i++) {
+                let attack = new BulletPath(boss.transform.position, presetPaths.straight(-1 / 4), "red", 5, 10, 150);
+                Game.instance.spawn(attack);
+                Game.instance.startTask(this, moveTo(boss.transform, randomPoint(Game.instance.bounds), 1000));
+                yield* wait(1000);
+            }
+            yield* waitUntil(() => tangentAttack.completed);
         }
     }
 }

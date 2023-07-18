@@ -2,16 +2,23 @@ import { Enemy } from "./Enemy";
 import { Entity } from "./Entity";
 import { Game } from "./Game";
 import { Timer } from "./Timer";
-import { PathFunc, Point, Vector } from "./Utils";
+import { PathFunc, Point, Vector, inBounds } from "./Utils";
 
 export function drawPath(ctx: CanvasRenderingContext2D, origin: Point, pathFunc : PathFunc, start: number, end:number, increment: number =1, color: string = "black") {
     ctx.strokeStyle = 'black';
+    ctx.lineWidth = 1;
     ctx.moveTo(origin.x, origin.y);
     ctx.beginPath();
-    let pathClosed = false;
+    const bounds = Game.instance.bounds;
     for (let i = start; i < end; i+=increment) {
-        let bullet = pathFunc(i);
-        ctx.lineTo(origin.x + bullet.x, origin.y + bullet.y);
+        let point = Vector.add(pathFunc(i), origin)
+        if(inBounds(point, bounds)) {
+            ctx.lineTo( point.x,point.y);
+        } else {
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(point.x, point.y);
+        }
     }
     ctx.stroke();
 }
@@ -45,7 +52,7 @@ export class BulletPath implements Entity {
     }
 
     draw(ctx: CanvasRenderingContext2D) {
-        drawPath(ctx, this.origin, this.pathFunction, Math.min(...this.activebullets), Math.max(...this.activebullets)+this.spawnTimer.totalTime, 1, this.color);
+        drawPath(ctx, this.origin, this.pathFunction, Math.min(...this.activebullets), Math.max(...this.activebullets)+this.spawnTimer.totalTime, 0.5, this.color);
         ctx.fillStyle = this.color;
         for (let i = 0; i < this.activebullets.length; i++) {
             let bullet = this.bulletAtTime(this.activebullets[i]);
@@ -120,4 +127,123 @@ export class BulletPath implements Entity {
     get points() {
         return this.activebullets.map(t => this.bulletAtTime(t));
     }
+}
+
+export class Laser implements Entity {
+    origin: Point;
+    pathFunction: (t: number) => { x: number; y: number; };
+    color: string = "red";
+    maxWidth: number = 5;
+    spawnTimer: Timer;
+    timeToLive: number = 6_000;
+    set TimeToLive(value: number) {
+        this.timeToLive = value;
+        this.spawnTimer.totalTime = value;
+    }
+    friendly: boolean = true;
+    damage: number = 1;
+    doBoundsCheck: boolean = false;
+    head: number = 0;
+    get tail() {
+        return Math.max(this.head - this.timeToLive, 0);
+    }
+    constructor(origin: Point,
+                pathfunc: PathFunc,) {
+        this.origin = origin;
+        this.pathFunction = pathfunc;
+        this.spawnTimer = new Timer(this.timeToLive, () => {}, false, false);
+    }
+
+    draw(ctx: CanvasRenderingContext2D) {
+        // drawPath(ctx, this.origin, this.pathFunction, Math.min(...this.activebullets), Math.max(...this.activebullets)+this.spawnTimer.totalTime, 1, this.color);
+        // ctx.fillStyle = this.color;
+        // for (let i = 0; i < this.activebullets.length; i++) {
+        //     let bullet = this.bulletAtTime(this.activebullets[i]);
+        //     ctx.beginPath();
+        //     ctx.arc(bullet.x, bullet.y, this.radius, 0, 2 * Math.PI);
+        //     ctx.fill();
+        // }ctx.moveTo(origin.x, origin.y);
+        ctx.strokeStyle = this.color;
+        ctx.lineWidth = this.maxWidth;
+        ctx.beginPath();
+        const bounds = Game.instance.bounds;
+        for (let i = this.tail; i < this.head; i+=0.25) {
+            let point = Vector.add(this.pathFunction(i), this.origin)
+            if(inBounds(point, bounds)) {
+                ctx.lineTo( point.x,point.y);
+            } else {
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(point.x, point.y);
+            }
+        }
+        ctx.stroke();
+        ctx.fillStyle = this.color;
+        
+    }
+    
+    boundsCheck(point: Point, margin: number = 0) {
+        //Checks if the point is at the edge of the screen with some margin
+        return point.x < Game.instance.bounds.x - margin ||
+            point.x > Game.instance.bounds.x + Game.instance.bounds.width + margin ||
+            point.y < Game.instance.bounds.y - margin ||
+            point.y > Game.instance.bounds.y + Game.instance.bounds.height + margin;
+    }
+    update(dt :number) {
+        // if (this.completed) {
+        //     Game.instance.remove(this);
+        //     return;
+        // }
+        // for (let i = 0; i < this.activebullets.length; i++) {
+        //     this.activebullets[i]+=dt;
+        //     let bullet = this.bulletAtTime(this.activebullets[i]);
+        //     if (this.activebullets[i] > this.timeToLive) {
+        //         this.activebullets.splice(i, 1);
+        //         i--;
+        //     } else if (this.doBoundsCheck && this.boundsCheck(bullet, 40)) {
+        //         this.activebullets.splice(i, 1);
+        //         i--;
+
+        //         //change the time to live to the time it took to get to the edge
+        //         //TODO i want to set time to live such that it is set initially
+        //         if(this.timeToLive > this.activebullets[i]) {
+        //             this.timeToLive = this.activebullets[i];
+        //         }
+        //     }
+        //     if (this.color == "blue") {//friendly bullets collide with enemies
+        //         for(const enemy of Game.instance.enemies) {
+        //             if (enemy.collides(bullet)) {
+        //                 this.activebullets.splice(i, 1);
+        //                 i--;
+        //                 Game.instance.remove(enemy);
+        //             }
+        //         }
+        //     } else if (this.color == "red") {//enemy bullets collide with player
+        //         if (Game.instance.player.collides(bullet)) {
+        //             this.activebullets.splice(i, 1);
+        //             i--;
+        //             Game.instance.timesHit++;
+        //         }
+        //     }
+        // }
+        this.head += dt;            
+        this.spawnTimer.update(dt);
+        if(this.completed) {
+            Game.instance.remove(this);
+        }
+    }
+    fire() {
+        this.spawnTimer.start();
+    }
+    get completed() {
+        return !inBounds(this.bulletAtTime(this.tail), Game.instance.bounds);
+    }
+
+    bulletAtTime(t: number) {
+        return Vector.add(this.origin, this.pathFunction(t));
+    }
+
+    // get points() {
+    //     return this.activebullets.map(t => this.bulletAtTime(t));
+    // }
 }

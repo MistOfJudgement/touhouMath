@@ -68,3 +68,7 @@ export function randomPoint(bounds: {x: number, y: number, width: number, height
 export function clamp(value: number, min: number, max: number) {
     return Math.min(Math.max(value, min), max);
 }
+
+export function inBounds(point: Point, bounds: {x: number, y: number, width: number, height: number}) {
+    return point.x >= bounds.x && point.x <= bounds.x + bounds.width && point.y >= bounds.y && point.y <= bounds.y + bounds.height;
+}
