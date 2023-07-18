@@ -13,6 +13,9 @@ export const presetPaths = {
     cos: (speed: number, amplitude: number, period: number) => {
         return (t: number) => ({x: t * speed, y: Math.cos(t*speed*Math.PI/period)*amplitude});
     },
+    tan: (speed: number, amplitude: number, period: number) => {
+        return (t: number) => ({x: t * speed, y: Math.tan(t*speed*Math.PI/period)*amplitude});
+    }
 }
 
 const body = document.querySelector("body");

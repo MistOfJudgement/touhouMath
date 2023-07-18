@@ -71,3 +71,27 @@ export const LyricaSpellcard01: Spellcard = {
         }
     }
 }
+
+export const LyricaSpellcard02: Spellcard = {
+    name: "Tangent Trap [y=tan(x)]",
+    complete: false,
+    init: (boss: Boss) => {
+        boss.state = "inactive";
+        Game.instance.player.state = "moving";
+    },
+    *update(boss: Boss): Task {
+        while(true) {
+            let tangentAttack = new BulletPath(boss.transform.position, presetPaths.tan(-1 / 8, 50, 50), "red", 5, (1000/10)*5, 10);
+            tangentAttack.doBoundsCheck = false;
+            Game.instance.spawn(tangentAttack);
+            yield* wait(4000);
+            Game.instance.startTask(this, moveToEase(boss.transform, randomPoint(Game.instance.bounds), 300, Easing.easeOutCubic));
+            yield* wait(300);
+            Game.instance.startTask(this, moveToEase(boss.transform, randomPoint(Game.instance.bounds), 300, Easing.easeOutCubic));
+            yield* wait(300);
+            Game.instance.startTask(this, moveToEase(boss.transform, randomPoint(Game.instance.bounds), 300, Easing.easeOutCubic));
+            yield* wait(300);
+            yield* waitUntil(() => tangentAttack.count === 0);
+        }
+    }
+}

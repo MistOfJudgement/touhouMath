@@ -1,5 +1,5 @@
 import { Boss } from "./Boss";
-import { LyricaSpellcard01, YoumuSpellcard01 } from "./data";
+import { LyricaSpellcard01, LyricaSpellcard02, YoumuSpellcard01 } from "./data";
 import { BulletPath } from "./BulletPath";
 import { DialogueSystem } from "./Dialogue";
 import { Enemy } from "./Enemy";
@@ -69,7 +69,12 @@ export class Game {
                 this.clearBulletPaths();
                 this.clearTasks(boss);
             },
-            {speaker: "Cirno", text: "That's all for now!"},
+            // {speaker: "Cirno", text: "That's all for now!"},
+            () => {this.player.state = "inactive";
+                this.clearBulletPaths();
+                this.clearTasks(boss);
+            },
+            LyricaSpellcard02
 
         ];
         boss.processEvent();

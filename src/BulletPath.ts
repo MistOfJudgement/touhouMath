@@ -8,7 +8,8 @@ export function drawPath(ctx: CanvasRenderingContext2D, origin: Point, pathFunc 
     ctx.strokeStyle = 'black';
     ctx.moveTo(origin.x, origin.y);
     ctx.beginPath();
-    for (let i = start; i < end; i+=1) {
+    let pathClosed = false;
+    for (let i = start; i < end; i+=increment) {
         let bullet = pathFunc(i);
         ctx.lineTo(origin.x + bullet.x, origin.y + bullet.y);
     }
@@ -25,6 +26,7 @@ export class BulletPath implements Entity {
     timeToLive: number = 6_000;
     friendly: boolean = true;
     damage: number = 1;
+    doBoundsCheck: boolean = false;
     constructor(origin: Point,
                 pathfunc: PathFunc, 
                 color: string = "blue", 
@@ -71,7 +73,7 @@ export class BulletPath implements Entity {
             if (this.activebullets[i] > this.timeToLive) {
                 this.activebullets.splice(i, 1);
                 i--;
-            } else if (this.boundsCheck(bullet, 40)) {
+            } else if (this.doBoundsCheck && this.boundsCheck(bullet, 40)) {
                 this.activebullets.splice(i, 1);
                 i--;
 
