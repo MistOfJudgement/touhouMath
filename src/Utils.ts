@@ -72,3 +72,12 @@ export function clamp(value: number, min: number, max: number) {
 export function inBounds(point: Point, bounds: {x: number, y: number, width: number, height: number}) {
     return point.x >= bounds.x && point.x <= bounds.x + bounds.width && point.y >= bounds.y && point.y <= bounds.y + bounds.height;
 }
+export interface IScript {
+    initialize(): void,
+    mainLoop(): Task,
+    finalize(): void
+}
+
+export function rand(min: number, max: number) {
+    return Math.random() * (max - min) + min;
+}
