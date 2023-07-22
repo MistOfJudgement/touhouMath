@@ -10,6 +10,7 @@ export const Vector = {
     magnitudeSquared: (a: Point) => a.x * a.x + a.y * a.y,
     distance: (a: Point, b: Point) => Vector.magnitude(Vector.subtract(a, b)),
     distanceSquared: (a: Point, b: Point) => Vector.magnitudeSquared(Vector.subtract(a, b)),
+    angle: (a: Point, b: Point) => Math.atan2(b.y - a.y, b.x - a.x),
 }
 
 export type PathFunc = (t: number) => Point;
@@ -80,4 +81,12 @@ export interface IScript {
 
 export function rand(min: number, max: number) {
     return Math.random() * (max - min) + min;
+}
+
+export function deg2rad(deg: number) {
+    return deg * Math.PI / 180;
+}
+
+export function rad2deg(rad: number) {
+    return rad * 180 / Math.PI;
 }
