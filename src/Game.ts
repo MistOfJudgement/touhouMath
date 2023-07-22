@@ -7,7 +7,8 @@ import { Entity } from "./Entity";
 import { Input } from "./Input";
 import { PhysicsSystem } from "./Physics";
 import { Player } from "./Player";
-import { Point, Task } from "./Utils";
+import { IScript, Point, Task } from "./Utils";
+import { Minoriko } from "./data/Stage1";
 
 
 export class Game {
@@ -28,6 +29,8 @@ export class Game {
     private lastTimestamp: DOMHighResTimeStamp = 0;
     static instance: Game;
     dialogueSystem: DialogueSystem = new DialogueSystem();
+
+    currentScript: IScript | null = null;
     constructor() {
         Game.instance = this;
 
@@ -41,44 +44,50 @@ export class Game {
         this.canvas.addEventListener("mousemove", (e) => {
             this.mouse = {x: e.offsetX, y: e.offsetY};
         });
+
+        this.currentScript = new Minoriko(this);
     }
 
     changeToPlaying() {
         this.state = "playing";
         this.entities = [];
         this.spawn(this.player);
-        this.spawn(this.dialogueSystem)
-        const boss = new Boss();
-        this.spawn(boss);
-        boss.maxHealth = 5;
-        boss.health = 5;
-        this.player.state = "inactive";
-        boss.state = "inactive";
-        boss.events = [
-            {speaker: "Cirno", text: "Hello!"},
-            {speaker: "Cirno", text: "This is a test dialogue system."},
-            YoumuSpellcard01,
-            () => {this.player.state = "inactive";
-                this.clearBulletPaths();
+        if(this.currentScript) {
+            this.currentScript.initialize();
+            this.startTask(this.currentScript, this.currentScript.mainLoop());
+        }
+        // this.spawn(this.dialogueSystem)
+        // const boss = new Boss();
+        // this.spawn(boss);
+        // boss.maxHealth = 5;
+        // boss.health = 5;
+        // this.player.state = "inactive";
+        // boss.state = "inactive";
+        // boss.events = [
+        //     {speaker: "Cirno", text: "Hello!"},
+        //     {speaker: "Cirno", text: "This is a test dialogue system."},
+        //     YoumuSpellcard01,
+        //     () => {this.player.state = "inactive";
+        //         this.clearBulletPaths();
 
-                    this.clearTasks(boss);
-                },
-            {speaker: "Cirno", text: "Try this trig function!"},
-            LyricaSpellcard01,
-            () => {this.player.state = "inactive";
-                this.clearBulletPaths();
-                this.clearTasks(boss);
-            },
-            // {speaker: "Cirno", text: "That's all for now!"},
-            () => {this.player.state = "inactive";
-                this.clearBulletPaths();
-                this.clearTasks(boss);
-            },
-            {speaker: "debug", text: "debugging"},
-            LyricaSpellcard02
+        //             this.clearTasks(boss);
+        //         },
+        //     {speaker: "Cirno", text: "Try this trig function!"},
+        //     LyricaSpellcard01,
+        //     () => {this.player.state = "inactive";
+        //         this.clearBulletPaths();
+        //         this.clearTasks(boss);
+        //     },
+        //     // {speaker: "Cirno", text: "That's all for now!"},
+        //     () => {this.player.state = "inactive";
+        //         this.clearBulletPaths();
+        //         this.clearTasks(boss);
+        //     },
+        //     {speaker: "debug", text: "debugging"},
+        //     LyricaSpellcard02
 
-        ];
-        boss.processEvent();
+        // ];
+        // boss.processEvent();
         // this.dialogueSystem.active = true;
         // this.dialogueSystem.onFinish = () => {
         //     this.player.state = "moving";
